@@ -1,8 +1,10 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import type { Property } from "../types/property";
+import { ArrowLeft, MapPin } from "lucide-react";
 
 export default function PropertyDetail() {
   const location = useLocation();
+  const navigate = useNavigate();
   const property = location.state as Property;
 
   if (!property) {
@@ -10,41 +12,66 @@ export default function PropertyDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-white p-4">
-      {/* Image */}
-      <img
-        src={property.image}
-        className="w-full h-60 object-cover rounded-xl"
-      />
+    <div className="min-h-screen bg-white pb-20">
+      {/* Image Section */}
+      <div className="relative">
+        <img src={property.image} className="w-full h-64 object-cover" />
 
-      {/* Info */}
-      <h1 className="text-xl font-semibold mt-4">{property.title}</h1>
-
-      <p className="text-gray-500 mt-1">{property.location}</p>
-
-      <p className="text-emeraldAccent text-lg font-semibold mt-2">
-        ₹{property.price} / month
-      </p>
-
-      {/* Distance */}
-      <p className="text-gray-500 mt-2 text-sm">
-        {property.distance} from your office
-      </p>
-
-      {/* Amenities (dummy for now) */}
-      <div className="mt-4">
-        <h3 className="font-semibold">Amenities</h3>
-        <ul className="text-sm text-gray-600 mt-2 space-y-1">
-          <li>• WiFi</li>
-          <li>• AC</li>
-          <li>• Food Included</li>
-        </ul>
+        {/* Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-4 left-4 bg-white p-2 rounded-full shadow"
+        >
+          <ArrowLeft size={18} />
+        </button>
       </div>
 
-      {/* CTA */}
-      <button className="mt-6 w-full bg-emeraldAccent text-white py-3 rounded-xl">
-        Book Visit
-      </button>
+      {/* Content */}
+      <div className="p-4">
+        {/* Title + Price */}
+        <div className="flex justify-between items-start">
+          <h1 className="text-lg font-semibold text-gray-800">
+            {property.title}
+          </h1>
+
+          <span className="text-emeraldAccent font-semibold">
+            ₹{property.price}
+          </span>
+        </div>
+
+        {/* Location */}
+        <div className="flex items-center gap-1 text-gray-500 text-sm mt-2">
+          <MapPin size={14} />
+          {property.location}
+        </div>
+
+        {/* Distance */}
+        <p className="text-gray-500 text-sm mt-1">
+          {property.distance} from your office
+        </p>
+
+        {/* Divider */}
+        <div className="border-t border-gray-200 my-4"></div>
+
+        {/* Amenities */}
+        <div>
+          <h3 className="font-semibold text-gray-800">Amenities</h3>
+
+          <div className="grid grid-cols-2 gap-2 mt-3 text-sm text-gray-600">
+            <span>WiFi</span>
+            <span>AC</span>
+            <span>Food Included</span>
+            <span>Power Backup</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky Bottom CTA */}
+      <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4">
+        <button className="w-full bg-emeraldAccent text-white py-3 rounded-xl font-medium">
+          Book Visit
+        </button>
+      </div>
     </div>
   );
 }
