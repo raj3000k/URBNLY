@@ -4,7 +4,7 @@ export default function SearchBar() {
       <input
         type="text"
         placeholder="Search by area, office, PG..."
-        className="w-full outline-none text-sm"
+        className="w-full outline-none text-sm placeholder-gray-400"
       />
     </div>
   );
