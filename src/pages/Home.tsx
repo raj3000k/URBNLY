@@ -7,6 +7,7 @@ import Filters from "../components/Filters";
 import SkeletonCard from "../components/SkeletonCard";
 import type { Property } from "../types/property";
 import useDebounce from "../hooks/useDebounce";
+import { useAuth } from "../context/AuthContext";
 
 export default function Home() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -17,6 +18,7 @@ export default function Home() {
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const { user, logout } = useAuth();
 
   const debouncedSearch = useDebounce(search, 300);
 
@@ -49,7 +51,7 @@ export default function Home() {
         setProperties((prev) => (page === 1 ? newData : [...prev, ...newData]));
 
         setHasMore(newData.length > 0);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         if (err.name !== "CanceledError") {
           setError("Failed to load properties");
@@ -85,12 +87,18 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 p-4 space-y-4">
       {/* Header */}
-      <h1 className="text-2xl font-semibold text-emeraldDark">
-        Urbanly
-        {loading && (
-          <span className="ml-2 text-sm text-gray-400">loading...</span>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold text-emeraldDark">Urbanly</h1>
+
+        {user && (
+          <button
+            onClick={logout}
+            className="text-sm text-red-500 border border-red-300 px-3 py-1 rounded-lg"
+          >
+            Logout
+          </button>
         )}
-      </h1>
+      </div>
 
       <SearchBar value={search} onChange={setSearch} />
       <RecommendationBanner />
