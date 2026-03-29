@@ -105,6 +105,12 @@ export default function Home() {
             >
               {user.name.split(" ")[0]}
             </Link>
+            <Link
+              to="/dashboard"
+              className="rounded-lg border border-emeraldDark/10 px-3 py-1 text-sm font-semibold text-emeraldDark"
+            >
+              Dashboard
+            </Link>
             <button
               onClick={logout}
               className="text-sm text-red-500 border border-red-300 px-3 py-1 rounded-lg"

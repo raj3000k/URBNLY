@@ -96,6 +96,12 @@ export default function Profile() {
                 Explore properties
               </Link>
               <Link
+                to="/dashboard"
+                className="block rounded-2xl bg-emeraldAccent px-4 py-3 text-center font-semibold text-white transition hover:bg-emeraldDark"
+              >
+                Open owner dashboard
+              </Link>
+              <Link
                 to="/register"
                 className="block rounded-2xl border border-white/20 px-4 py-3 text-center font-semibold text-white transition hover:bg-white/10"
               >

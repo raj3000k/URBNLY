@@ -6,6 +6,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import SavedProperties from "./pages/SavedProperties";
+import OwnerDashboard from "./pages/OwnerDashboard";
 
 function App() {
   return (
@@ -27,6 +28,14 @@ function App() {
         element={
           <ProtectedRoute>
             <SavedProperties />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <OwnerDashboard />
           </ProtectedRoute>
         }
       />
