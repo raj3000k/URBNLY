@@ -8,6 +8,7 @@ import SkeletonCard from "../components/SkeletonCard";
 import type { Property } from "../types/property";
 import useDebounce from "../hooks/useDebounce";
 import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 
 export default function Home() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -91,12 +92,26 @@ export default function Home() {
         <h1 className="text-2xl font-semibold text-emeraldDark">Urbanly</h1>
 
         {user && (
-          <button
-            onClick={logout}
-            className="text-sm text-red-500 border border-red-300 px-3 py-1 rounded-lg"
-          >
-            Logout
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/saved"
+              className="rounded-lg border border-emeraldAccent/20 bg-emeraldAccent/10 px-3 py-1 text-sm font-semibold text-emeraldDark"
+            >
+              Saved
+            </Link>
+            <Link
+              to="/profile"
+              className="rounded-lg border border-emeraldDark/10 px-3 py-1 text-sm font-semibold text-emeraldDark"
+            >
+              {user.name.split(" ")[0]}
+            </Link>
+            <button
+              onClick={logout}
+              className="text-sm text-red-500 border border-red-300 px-3 py-1 rounded-lg"
+            >
+              Logout
+            </button>
+          </div>
         )}
       </div>
 

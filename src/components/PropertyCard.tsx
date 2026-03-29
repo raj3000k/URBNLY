@@ -1,6 +1,8 @@
 import type { Property } from "../types/property";
-import { MapPin, CheckCircle } from "lucide-react";
+import { MapPin, CheckCircle, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useWishlist } from "../context/WishlistContext";
+import { useAuth } from "../context/AuthContext";
 
 type Props = {
   property: Property;
@@ -8,10 +10,13 @@ type Props = {
 
 export default function PropertyCard({ property }: Props) {
   const navigate = useNavigate();
+  const { toggleWishlist, isSaved } = useWishlist();
+  const { user } = useAuth();
+  const saved = isSaved(property.id);
 
   return (
     <div
-      onClick={() => navigate(`/property/${property.id}`, {state:property})}
+      onClick={() => navigate(`/property/${property.id}`, { state: property })}
       className="cursor-pointer bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition duration-200"
     >
       {/* Image */}
@@ -37,6 +42,28 @@ export default function PropertyCard({ property }: Props) {
             </span>
           )}
         </div>
+
+        {user && (
+          <button
+            onClick={async (event) => {
+              event.stopPropagation();
+              try {
+                await toggleWishlist(property);
+              } catch (error) {
+                if (error instanceof Error) {
+                  alert(error.message);
+                }
+              }
+            }}
+            className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-emeraldDark shadow transition hover:scale-105"
+            aria-label={saved ? "Remove from saved" : "Save property"}
+          >
+            <Heart
+              size={18}
+              className={saved ? "fill-red-500 text-red-500" : "text-emeraldDark"}
+            />
+          </button>
+        )}
       </div>
 
       {/* Content */}
@@ -67,7 +94,7 @@ export default function PropertyCard({ property }: Props) {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/property/${property.id}`, {state:property});
+            navigate(`/property/${property.id}`, { state: property });
           }}
           className="mt-4 w-full bg-emeraldAccent hover:bg-green-600 text-white text-sm py-2.5 rounded-xl transition"
         >

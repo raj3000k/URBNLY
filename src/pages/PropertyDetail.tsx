@@ -1,15 +1,21 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import type { Property } from "../types/property";
-import { ArrowLeft, MapPin } from "lucide-react";
+import { ArrowLeft, Heart, MapPin } from "lucide-react";
+import { useWishlist } from "../context/WishlistContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function PropertyDetail() {
   const location = useLocation();
   const navigate = useNavigate();
   const property = location.state as Property;
+  const { toggleWishlist, isSaved } = useWishlist();
+  const { user } = useAuth();
 
   if (!property) {
     return <div className="p-4">No property data found</div>;
   }
+
+  const saved = isSaved(property.id);
 
   return (
     <div className="min-h-screen bg-white pb-20">
@@ -24,6 +30,27 @@ export default function PropertyDetail() {
         >
           <ArrowLeft size={18} />
         </button>
+
+        {user && (
+          <button
+            onClick={async () => {
+              try {
+                await toggleWishlist(property);
+              } catch (error) {
+                if (error instanceof Error) {
+                  alert(error.message);
+                }
+              }
+            }}
+            className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white p-2 shadow"
+            aria-label={saved ? "Remove from saved" : "Save property"}
+          >
+            <Heart
+              size={18}
+              className={saved ? "fill-red-500 text-red-500" : "text-emeraldDark"}
+            />
+          </button>
+        )}
       </div>
 
       {/* Content */}
