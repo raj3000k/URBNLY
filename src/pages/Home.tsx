@@ -6,44 +6,98 @@ import RecommendationBanner from "../components/RecommendationBanner";
 import Filters from "../components/Filters";
 import SkeletonCard from "../components/SkeletonCard";
 import type { Property } from "../types/property";
+import useDebounce from "../hooks/useDebounce";
 
 export default function Home() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [budget, setBudget] = useState<number | null>(null);
+
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  const debouncedSearch = useDebounce(search, 300);
+
+  // Reset on search/filter change
+  useEffect(() => {
+    setPage(1);
+    setProperties([]);
+  }, [debouncedSearch, budget]);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchProperties = async () => {
+      setLoading(true);
+      setError("");
+
       try {
-        const res = await api.get("/properties");
-        setProperties(res.data);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (err) {
-        setError("Failed to load properties");
+        const res = await api.get("/properties", {
+          params: {
+            search: debouncedSearch,
+            budget: budget || undefined,
+            page,
+            limit: 5,
+          },
+          signal: controller.signal,
+        });
+
+        const newData = res.data.data;
+
+        setProperties((prev) => (page === 1 ? newData : [...prev, ...newData]));
+
+        setHasMore(newData.length > 0);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (err: any) {
+        if (err.name !== "CanceledError") {
+          setError("Failed to load properties");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchProperties();
-  }, []);
+
+    return () => controller.abort();
+  }, [debouncedSearch, budget, page]);
+
+  // Infinite scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >=
+          document.body.offsetHeight - 100 &&
+        hasMore &&
+        !loading
+      ) {
+        setPage((prev) => prev + 1);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hasMore, loading]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 space-y-4">
       {/* Header */}
-      <h1 className="text-2xl font-semibold text-emeraldDark">Urbanly</h1>
+      <h1 className="text-2xl font-semibold text-emeraldDark">
+        Urbanly
+        {loading && (
+          <span className="ml-2 text-sm text-gray-400">loading...</span>
+        )}
+      </h1>
 
-      {/* Search */}
-      <SearchBar />
-
-      {/* Recommendation */}
+      <SearchBar value={search} onChange={setSearch} />
       <RecommendationBanner />
+      <Filters selected={budget} onBudgetChange={setBudget} />
 
-      {/* Filters */}
-      <Filters />
-
-      {/* Loading */}
-      {loading && (
+      {/* Initial Loading */}
+      {loading && page === 1 && (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
             <SkeletonCard key={i} />
@@ -54,18 +108,26 @@ export default function Home() {
       {/* Error */}
       {!loading && error && <p className="text-red-500 text-sm">{error}</p>}
 
-      {/* Empty State */}
+      {/* Empty */}
       {!loading && !error && properties.length === 0 && (
         <p className="text-gray-500 text-sm">No properties found</p>
       )}
 
       {/* Listings */}
-      {!loading && !error && properties.length > 0 && (
-        <div className="space-y-4">
-          {properties.map((p) => (
-            <PropertyCard key={p.id} property={p} />
-          ))}
-        </div>
+      <div className="space-y-4">
+        {properties.map((p) => (
+          <PropertyCard key={p.id} property={p} />
+        ))}
+      </div>
+
+      {/* Bottom Loader */}
+      {loading && page > 1 && (
+        <p className="text-center text-gray-400 text-sm">Loading more...</p>
+      )}
+
+      {/* End */}
+      {!hasMore && !loading && (
+        <p className="text-center text-gray-400 text-sm">No more properties</p>
       )}
     </div>
   );
