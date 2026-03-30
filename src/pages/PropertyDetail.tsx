@@ -310,7 +310,7 @@ export default function PropertyDetail() {
           </h1>
           <p className="mt-3 text-sm text-fog">{error || "No property data found."}</p>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/home")}
             className="mt-6 rounded-2xl bg-emeraldDark px-5 py-3 font-semibold text-white transition hover:bg-emeraldAccent"
           >
             Back to listings

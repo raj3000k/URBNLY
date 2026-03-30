@@ -90,7 +90,7 @@ export default function Profile() {
             </p>
             <div className="mt-6 space-y-3">
               <Link
-                to="/"
+                to="/home"
                 className="block rounded-2xl bg-white px-4 py-3 text-center font-semibold text-emeraldDark transition hover:bg-sandstone"
               >
                 Explore properties

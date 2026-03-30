@@ -42,7 +42,7 @@ export default function SavedProperties() {
               Tap the heart icon on any listing to build your shortlist.
             </p>
             <Link
-              to="/"
+              to="/home"
               className="mt-6 inline-block rounded-2xl bg-emeraldDark px-5 py-3 font-semibold text-white transition hover:bg-emeraldAccent"
             >
               Explore stays

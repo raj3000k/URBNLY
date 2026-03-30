@@ -182,7 +182,7 @@ export default function OwnerDashboard() {
                 Back to profile
               </Link>
               <Link
-                to="/"
+                to="/home"
                 className="rounded-2xl bg-emeraldDark px-4 py-3 text-sm font-semibold text-white transition hover:bg-emeraldAccent"
               >
                 View marketplace

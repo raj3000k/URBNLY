@@ -24,7 +24,7 @@ export default function Register() {
   const { login, user } = useAuth();
 
   if (user) {
-    return <Navigate to="/profile" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   const validationMessage = useMemo(() => {
@@ -70,7 +70,7 @@ export default function Register() {
       });
 
       login(response.data.user, response.data.token);
-      navigate("/profile", { replace: true });
+      navigate("/home", { replace: true });
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setError(err.response?.data?.message || "Unable to create your account.");
@@ -92,8 +92,8 @@ export default function Register() {
           Create your account
         </h1>
         <p className="mt-2 text-sm text-fog">
-          Save properties, track your profile, and get ready for the next product
-          features as we build them out.
+          Create your account to unlock the app experience, save listings, and
+          compare stays by commute and fit.
         </p>
 
         <form className="mt-8 space-y-4" onSubmit={handleSubmit}>

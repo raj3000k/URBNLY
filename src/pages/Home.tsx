@@ -359,7 +359,9 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50 p-4 space-y-4">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-emeraldDark">Urbanly</h1>
+        <Link to="/home" className="text-2xl font-semibold text-emeraldDark">
+          Urbanly
+        </Link>
 
         {user && (
           <div className="flex items-center gap-3">

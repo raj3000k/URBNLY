@@ -12,7 +12,7 @@ export default function Login() {
   const { login, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectTo = location.state?.from || "/profile";
+  const redirectTo = location.state?.from || "/home";
 
   if (user) {
     return <Navigate to={redirectTo} replace />;
@@ -54,7 +54,7 @@ export default function Login() {
         </p>
         <h1 className="mt-3 font-display text-3xl text-emeraldDark">Welcome back</h1>
         <p className="mt-2 text-sm text-fog">
-          Sign in to continue exploring stays and manage your shortlist.
+          Sign in to continue into your commute-first PG dashboard.
         </p>
 
         <div className="mt-8 space-y-4">

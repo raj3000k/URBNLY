@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import PropertyDetail from "./pages/PropertyDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -11,10 +12,25 @@ import OwnerDashboard from "./pages/OwnerDashboard";
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/property/:id" element={<PropertyDetail />} />
+      <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/property/:id"
+        element={
+          <ProtectedRoute>
+            <PropertyDetail />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/profile"
         element={
