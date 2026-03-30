@@ -1,14 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import api from "../utils/api";
 import PropertyCard from "../components/PropertyCard";
 import SearchBar from "../components/SearchBar";
 import RecommendationBanner from "../components/RecommendationBanner";
 import Filters from "../components/Filters";
 import SkeletonCard from "../components/SkeletonCard";
+import SortBar, { type SortOption } from "../components/SortBar";
 import type { Property } from "../types/property";
 import useDebounce from "../hooks/useDebounce";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
+import type { CommuteInfo } from "../types/commute";
+import type { PlaceSuggestion, SelectedPlace } from "../types/place";
 
 export default function Home() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -16,12 +19,84 @@ export default function Home() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [budget, setBudget] = useState<number | null>(null);
+  const [officeQuery, setOfficeQuery] = useState("");
+  const [selectedOffice, setSelectedOffice] = useState<SelectedPlace | null>(null);
+  const [officeSuggestions, setOfficeSuggestions] = useState<PlaceSuggestion[]>([]);
+  const [placesLoading, setPlacesLoading] = useState(false);
+  const [placesSessionToken, setPlacesSessionToken] = useState("");
+  const [commuteLoading, setCommuteLoading] = useState(false);
+  const [commuteMessage, setCommuteMessage] = useState("");
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>("recommended");
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const { user, logout } = useAuth();
 
   const debouncedSearch = useDebounce(search, 300);
+  const debouncedOfficeQuery = useDebounce(officeQuery, 350);
+  const propertyIdsSignature = properties.map((property) => property.id).join(",");
+
+  const sortedProperties = useMemo(() => {
+    const list = [...properties];
+
+    const parseDistance = (property: Property) => {
+      const value = property.commute?.distanceText || property.distance;
+      const parsed = Number.parseFloat(value);
+      return Number.isFinite(parsed) ? parsed : Number.MAX_SAFE_INTEGER;
+    };
+
+    switch (sortBy) {
+      case "distance":
+        return list.sort((a, b) => parseDistance(a) - parseDistance(b));
+      case "price_low":
+        return list.sort((a, b) => a.price - b.price);
+      case "price_high":
+        return list.sort((a, b) => b.price - a.price);
+      case "rating":
+        return list.sort((a, b) => {
+          if (b.rating !== a.rating) {
+            return b.rating - a.rating;
+          }
+          return b.reviewCount - a.reviewCount;
+        });
+      case "recommended":
+      default:
+        return list.sort((a, b) => {
+          const scoreA =
+            a.rating * 20 +
+            (a.verified ? 8 : 0) +
+            (a.available ? 6 : 0) -
+            parseDistance(a) * 1.5;
+          const scoreB =
+            b.rating * 20 +
+            (b.verified ? 8 : 0) +
+            (b.available ? 6 : 0) -
+            parseDistance(b) * 1.5;
+
+          return scoreB - scoreA;
+        });
+    }
+  }, [properties, sortBy]);
+
+  useEffect(() => {
+    const storedOffice = localStorage.getItem("selectedOffice");
+
+    if (storedOffice) {
+      const parsedOffice = JSON.parse(storedOffice) as SelectedPlace;
+      setSelectedOffice(parsedOffice);
+      setOfficeQuery(parsedOffice.label);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectedOffice) {
+      localStorage.setItem("selectedOffice", JSON.stringify(selectedOffice));
+      return;
+    }
+
+    localStorage.removeItem("selectedOffice");
+  }, [selectedOffice]);
 
   // Reset on search/filter change
   useEffect(() => {
@@ -66,6 +141,201 @@ export default function Home() {
 
     return () => controller.abort();
   }, [debouncedSearch, budget, page]);
+
+  useEffect(() => {
+    if (debouncedOfficeQuery.trim().length < 3 || selectedOffice?.label === officeQuery.trim()) {
+      setOfficeSuggestions([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    const sessionToken = placesSessionToken || crypto.randomUUID();
+
+    if (!placesSessionToken) {
+      setPlacesSessionToken(sessionToken);
+    }
+
+    const fetchSuggestions = async () => {
+      setPlacesLoading(true);
+
+      try {
+        const response = await api.post(
+          "/places/autocomplete",
+          {
+            input: debouncedOfficeQuery.trim(),
+            sessionToken,
+          },
+          {
+            signal: controller.signal,
+          }
+        );
+
+        setOfficeSuggestions(response.data.data || []);
+      } catch {
+        setOfficeSuggestions([]);
+      } finally {
+        setPlacesLoading(false);
+      }
+    };
+
+    fetchSuggestions();
+
+    return () => controller.abort();
+  }, [debouncedOfficeQuery, officeQuery, selectedOffice?.label]);
+
+  useEffect(() => {
+    if (!selectedOffice || properties.length === 0) {
+      setProperties((current) =>
+        current.map((property) => ({
+          ...property,
+          commute: undefined,
+        }))
+      );
+      setCommuteMessage("");
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const fetchCommute = async () => {
+      setCommuteLoading(true);
+
+      try {
+        const response = await api.post(
+          "/commute",
+          {
+            officeLocation: selectedOffice.label,
+            officeCoordinates: selectedOffice.location,
+            propertyIds: properties.map((property) => property.id),
+          },
+          {
+            signal: controller.signal,
+          }
+        );
+
+        const commuteMap = new Map<string, CommuteInfo>();
+
+        response.data.data.forEach(
+          (commute: CommuteInfo & { propertyId: string }) => {
+            commuteMap.set(commute.propertyId, {
+              officeLocation: commute.officeLocation,
+              distanceText: commute.distanceText,
+              durationText: commute.durationText,
+              source: commute.source,
+              status: commute.status,
+            });
+          }
+        );
+
+        setProperties((current) =>
+          current.map((property) => ({
+            ...property,
+            commute: commuteMap.get(property.id),
+          }))
+        );
+        setCommuteMessage(response.data.message || "");
+      } catch (err) {
+        if (
+          !(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            typeof err === "object" && err && (err as any).name === "CanceledError"
+          )
+        ) {
+          setCommuteMessage("Unable to refresh commute estimates right now.");
+        }
+      } finally {
+        setCommuteLoading(false);
+      }
+    };
+
+    fetchCommute();
+
+    return () => controller.abort();
+  }, [selectedOffice, propertyIdsSignature, properties.length]);
+
+  const handleSuggestionSelect = async (suggestion: PlaceSuggestion) => {
+    setOfficeQuery(suggestion.text);
+    setOfficeSuggestions([]);
+    setCommuteMessage("");
+
+    try {
+      const response = await api.post("/places/details", {
+        placeId: suggestion.placeId,
+        sessionToken: placesSessionToken || crypto.randomUUID(),
+      });
+
+      const office = response.data as SelectedPlace;
+      setSelectedOffice(office);
+      setOfficeQuery(office.label);
+      setPlacesSessionToken("");
+    } catch {
+      setCommuteMessage("Unable to select that office right now.");
+    }
+  };
+
+  const handleOfficeQueryChange = (value: string) => {
+    setOfficeQuery(value);
+
+    if (selectedOffice && value.trim() !== selectedOffice.label) {
+      setSelectedOffice(null);
+    }
+
+    if (value.trim().length < 3) {
+      setPlacesSessionToken("");
+    }
+  };
+
+  const handleClearOffice = () => {
+    setOfficeQuery("");
+    setSelectedOffice(null);
+    setOfficeSuggestions([]);
+    setPlacesSessionToken("");
+    setCommuteMessage("");
+  };
+
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      setCommuteMessage("Location detection is not supported in this browser.");
+      return;
+    }
+
+    setLocationLoading(true);
+    setCommuteMessage("");
+    setOfficeSuggestions([]);
+    setPlacesSessionToken("");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const detectedOffice: SelectedPlace = {
+          placeId: "current-location",
+          label: "Current location",
+          displayName: "Current location",
+          location: {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          },
+        };
+
+        setSelectedOffice(detectedOffice);
+        setOfficeQuery("Current location");
+        setCommuteMessage(
+          "Using your current location directly to save extra Places API calls."
+        );
+        setLocationLoading(false);
+      },
+      (geoError) => {
+        setLocationLoading(false);
+        setCommuteMessage(
+          geoError.message || "Unable to detect your current location."
+        );
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 10000,
+        maximumAge: 300000,
+      }
+    );
+  };
 
   // Infinite scroll
   useEffect(() => {
@@ -122,8 +392,20 @@ export default function Home() {
       </div>
 
       <SearchBar value={search} onChange={setSearch} />
-      <RecommendationBanner />
+      <RecommendationBanner
+        officeQuery={officeQuery}
+        selectedOfficeLabel={selectedOffice?.label || ""}
+        suggestions={officeSuggestions}
+        loading={commuteLoading || placesLoading}
+        locationLoading={locationLoading}
+        message={commuteMessage}
+        onOfficeQueryChange={handleOfficeQueryChange}
+        onSuggestionSelect={handleSuggestionSelect}
+        onClearOffice={handleClearOffice}
+        onDetectLocation={handleDetectLocation}
+      />
       <Filters selected={budget} onBudgetChange={setBudget} />
+      <SortBar value={sortBy} onChange={setSortBy} />
 
       {/* Initial Loading */}
       {loading && page === 1 && (
@@ -144,7 +426,7 @@ export default function Home() {
 
       {/* Listings */}
       <div className="space-y-4">
-        {properties.map((p) => (
+        {sortedProperties.map((p) => (
           <PropertyCard key={p.id} property={p} />
         ))}
       </div>

@@ -1,3 +1,5 @@
+import type { CommuteInfo } from "./commute";
+
 export interface Property {
   id: string;
   ownerId?: string;
@@ -9,6 +11,8 @@ export interface Property {
   available: boolean;
   verified: boolean;
   distance: string;
+  rating: number;
+  reviewCount: number;
   description: string;
   roomType: string;
   deposit: number;
@@ -22,4 +26,5 @@ export interface Property {
     responseTime: string;
     role: string;
   };
+  commute?: CommuteInfo;
 }

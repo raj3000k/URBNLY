@@ -1,5 +1,5 @@
 import type { Property } from "../types/property";
-import { MapPin, CheckCircle, Heart } from "lucide-react";
+import { MapPin, CheckCircle, Heart, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useWishlist } from "../context/WishlistContext";
 import { useAuth } from "../context/AuthContext";
@@ -87,8 +87,16 @@ export default function PropertyCard({ property }: Props) {
 
         {/* Distance */}
         <p className="text-gray-500 text-xs mt-1">
-          {property.distance} from office
+          {property.commute
+            ? `${property.commute.durationText} drive • ${property.commute.distanceText}`
+            : `${property.distance} from office`}
         </p>
+
+        <div className="mt-2 flex items-center gap-1 text-xs text-fog">
+          <Star size={13} className="fill-amber-400 text-amber-400" />
+          <span className="font-semibold text-inkSlate">{property.rating.toFixed(1)}</span>
+          <span>({property.reviewCount} reviews)</span>
+        </div>
 
         {/* CTA */}
         <button

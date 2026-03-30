@@ -5,6 +5,7 @@ import {
   BedDouble,
   ChevronLeft,
   ChevronRight,
+  CreditCard,
   Heart,
   MapPin,
   ShieldCheck,
@@ -14,8 +15,18 @@ import {
 import axios from "axios";
 import api from "../utils/api";
 import type { Property } from "../types/property";
+import type { Booking } from "../types/booking";
+import type { CommuteInfo } from "../types/commute";
 import { useWishlist } from "../context/WishlistContext";
 import { useAuth } from "../context/AuthContext";
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+    };
+  }
+}
 
 function DetailSkeleton() {
   return (
@@ -37,6 +48,21 @@ function DetailSkeleton() {
   );
 }
 
+const loadRazorpayScript = () =>
+  new Promise<boolean>((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+
 export default function PropertyDetail() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -46,12 +72,24 @@ export default function PropertyDetail() {
   const [loading, setLoading] = useState(!initialProperty);
   const [error, setError] = useState("");
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [bookingMessage, setBookingMessage] = useState("");
+  const [bookingError, setBookingError] = useState("");
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [latestBooking, setLatestBooking] = useState<Booking | null>(null);
+  const [commuteInfo, setCommuteInfo] = useState<CommuteInfo | null>(
+    initialProperty?.commute || null
+  );
+  const [commuteLoading, setCommuteLoading] = useState(false);
   const { toggleWishlist, isSaved } = useWishlist();
   const { user } = useAuth();
 
   useEffect(() => {
     setActiveImageIndex(0);
   }, [property?.id]);
+
+  useEffect(() => {
+    setCommuteInfo(initialProperty?.commute || null);
+  }, [initialProperty?.commute, initialProperty?.id]);
 
   useEffect(() => {
     if (initialProperty || !id) {
@@ -92,6 +130,66 @@ export default function PropertyDetail() {
     };
   }, [id, initialProperty]);
 
+  useEffect(() => {
+    if (!property) {
+      return;
+    }
+
+    const storedOffice = localStorage.getItem("selectedOffice");
+
+    if (!storedOffice) {
+      return;
+    }
+
+    const parsedOffice = JSON.parse(storedOffice) as {
+      label: string;
+      location: {
+        latitude: number;
+        longitude: number;
+      };
+    };
+
+    const controller = new AbortController();
+
+    const fetchCommute = async () => {
+      setCommuteLoading(true);
+
+      try {
+        const response = await api.post(
+          "/commute",
+          {
+            officeLocation: parsedOffice.label,
+            officeCoordinates: parsedOffice.location,
+            propertyIds: [property.id],
+          },
+          {
+            signal: controller.signal,
+          }
+        );
+
+        const commute = response.data.data?.[0];
+
+        if (commute) {
+          setCommuteInfo({
+            officeLocation: commute.officeLocation,
+            distanceText: commute.distanceText,
+            durationText: commute.durationText,
+            source: commute.source,
+            status: commute.status,
+          });
+        }
+      } catch {
+        setCommuteInfo(null);
+      } finally {
+        setCommuteLoading(false);
+      }
+    };
+
+    fetchCommute();
+
+    return () => controller.abort();
+  }, [property]);
+
   const gallery = useMemo(() => {
     if (!property) {
       return [];
@@ -103,6 +201,101 @@ export default function PropertyDetail() {
 
     return [property.image];
   }, [property]);
+
+  const confirmBooking = async (payload: {
+    bookingId: string;
+    razorpay_order_id?: string;
+    razorpay_payment_id?: string;
+    razorpay_signature?: string;
+  }) => {
+    const response = await api.post("/bookings/confirm", payload);
+    setLatestBooking(response.data.booking as Booking);
+    setBookingMessage("Token booking confirmed. The owner can now follow up with you.");
+    setBookingError("");
+  };
+
+  const handleBooking = async () => {
+    if (!property) {
+      return;
+    }
+
+    if (!user) {
+      navigate("/login", { state: { from: `/property/${property.id}` } });
+      return;
+    }
+
+    setBookingLoading(true);
+    setBookingError("");
+    setBookingMessage("");
+
+    try {
+      const response = await api.post("/bookings/create-order", {
+        propertyId: property.id,
+      });
+
+      const { provider, booking, order, keyId, message } = response.data as {
+        provider: "demo" | "razorpay";
+        booking: Booking;
+        order: { id: string; amount: number; currency: string };
+        keyId?: string;
+        message?: string;
+      };
+
+      if (provider === "demo") {
+        await confirmBooking({
+          bookingId: booking.id,
+          razorpay_order_id: order.id,
+          razorpay_payment_id: `demo_payment_${booking.id}`,
+        });
+        setBookingMessage(
+          message ||
+            "Demo booking completed. Add Razorpay test keys to switch this to real checkout."
+        );
+        return;
+      }
+
+      const scriptLoaded = await loadRazorpayScript();
+
+      if (!scriptLoaded || !window.Razorpay) {
+        setBookingError("Unable to load Razorpay checkout. Please try again.");
+        return;
+      }
+
+      const razorpay = new window.Razorpay({
+        key: keyId,
+        amount: order.amount,
+        currency: order.currency,
+        name: "Urbanly",
+        description: `Token booking for ${property.title}`,
+        order_id: order.id,
+        handler: async (paymentResponse: Record<string, string>) => {
+          await confirmBooking({
+            bookingId: booking.id,
+            razorpay_order_id: paymentResponse.razorpay_order_id,
+            razorpay_payment_id: paymentResponse.razorpay_payment_id,
+            razorpay_signature: paymentResponse.razorpay_signature,
+          });
+        },
+        prefill: {
+          name: user.name,
+          email: user.email,
+        },
+        theme: {
+          color: "#0F5C4A",
+        },
+      });
+
+      razorpay.open();
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setBookingError(err.response?.data?.message || "Unable to start booking flow");
+      } else {
+        setBookingError("Unable to start booking flow");
+      }
+    } finally {
+      setBookingLoading(false);
+    }
+  };
 
   if (loading) {
     return <DetailSkeleton />;
@@ -244,7 +437,11 @@ export default function PropertyDetail() {
                     <MapPin size={15} />
                     <span>{property.location}</span>
                     <span className="text-emeraldAccent">•</span>
-                    <span>{property.distance} from office</span>
+                    <span>
+                      {commuteInfo
+                        ? `${commuteInfo.durationText} drive • ${commuteInfo.distanceText}`
+                        : `${property.distance} from office`}
+                    </span>
                   </div>
                 </div>
 
@@ -360,10 +557,30 @@ export default function PropertyDetail() {
             </div>
 
             <div className="rounded-[30px] border border-white/70 bg-white/90 p-6 shadow-float backdrop-blur">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-fog">
-                Quick summary
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-fog">
+                    Token booking
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl text-emeraldDark">
+                    Reserve with ₹999
+                  </h2>
+                </div>
+                <div className="rounded-2xl bg-emeraldSoft px-3 py-2 text-xs font-semibold text-emeraldDark">
+                  Test mode
+                </div>
+              </div>
+
+              <p className="mt-4 text-sm leading-6 text-fog">
+                Pay a small booking token to show serious intent and get the owner to
+                hold the room for follow-up.
               </p>
+
               <div className="mt-5 space-y-3 text-sm text-fog">
+                <div className="flex items-center justify-between rounded-2xl bg-mintMist px-4 py-3">
+                  <span>Token amount</span>
+                  <span className="font-semibold text-emeraldDark">₹999</span>
+                </div>
                 <div className="flex items-center justify-between rounded-2xl bg-mintMist px-4 py-3">
                   <span>Availability</span>
                   <span className="font-semibold text-emeraldDark">
@@ -371,18 +588,42 @@ export default function PropertyDetail() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between rounded-2xl bg-mintMist px-4 py-3">
-                  <span>Verification</span>
+                  <span>Commute</span>
                   <span className="font-semibold text-emeraldDark">
-                    {property.verified ? "Verified" : "Pending"}
+                    {commuteInfo
+                      ? `${commuteInfo.durationText} • ${commuteInfo.distanceText}`
+                      : property.distance}
                   </span>
                 </div>
                 <div className="flex items-center justify-between rounded-2xl bg-mintMist px-4 py-3">
-                  <span>Commute</span>
+                  <span>Rating</span>
                   <span className="font-semibold text-emeraldDark">
-                    {property.distance}
+                    {property.rating.toFixed(1)} / 5
                   </span>
                 </div>
               </div>
+
+              {commuteLoading && (
+                <p className="mt-4 text-xs text-fog">Refreshing commute estimate...</p>
+              )}
+
+              {bookingError && (
+                <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {bookingError}
+                </p>
+              )}
+
+              {bookingMessage && (
+                <p className="mt-4 rounded-2xl border border-emeraldAccent/20 bg-emeraldSoft px-4 py-3 text-sm text-emeraldDark">
+                  {bookingMessage}
+                </p>
+              )}
+
+              {latestBooking && (
+                <div className="mt-4 rounded-2xl border border-emeraldDark/10 px-4 py-3 text-sm text-fog">
+                  Latest booking: <span className="font-semibold text-emeraldDark">{latestBooking.status}</span>
+                </div>
+              )}
             </div>
           </aside>
         </div>
@@ -393,8 +634,13 @@ export default function PropertyDetail() {
           <button className="flex-1 rounded-2xl border border-emeraldDark/10 px-5 py-3 font-semibold text-emeraldDark transition hover:bg-mintMist">
             Schedule a visit
           </button>
-          <button className="flex-1 rounded-2xl bg-emeraldDark px-5 py-3 font-semibold text-white transition hover:bg-emeraldAccent">
-            Book this property
+          <button
+            onClick={handleBooking}
+            disabled={bookingLoading || !property.available}
+            className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-emeraldDark px-5 py-3 font-semibold text-white transition hover:bg-emeraldAccent disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <CreditCard size={18} />
+            {bookingLoading ? "Starting booking..." : "Pay ₹999 token"}
           </button>
         </div>
       </div>
