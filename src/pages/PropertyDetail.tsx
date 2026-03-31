@@ -11,12 +11,14 @@ import {
   ShieldCheck,
   Sparkles,
   Utensils,
+  Users2,
 } from "lucide-react";
 import axios from "axios";
 import api from "../utils/api";
 import type { Property } from "../types/property";
 import type { Booking } from "../types/booking";
 import type { CommuteInfo } from "../types/commute";
+import type { RoommateMatch } from "../types/match";
 import { useWishlist } from "../context/WishlistContext";
 import { useAuth } from "../context/AuthContext";
 
@@ -79,6 +81,8 @@ export default function PropertyDetail() {
   const [commuteInfo, setCommuteInfo] = useState<CommuteInfo | null>(
     initialProperty?.commute || null
   );
+  const [matches, setMatches] = useState<RoommateMatch[]>([]);
+  const [matchesLoading, setMatchesLoading] = useState(false);
   const [commuteLoading, setCommuteLoading] = useState(false);
   const { toggleWishlist, isSaved } = useWishlist();
   const { user } = useAuth();
@@ -189,6 +193,34 @@ export default function PropertyDetail() {
 
     return () => controller.abort();
   }, [property]);
+
+  useEffect(() => {
+    if (!property || !user) {
+      setMatches([]);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const fetchMatches = async () => {
+      setMatchesLoading(true);
+
+      try {
+        const response = await api.get(`/matches/${property.id}`, {
+          signal: controller.signal,
+        });
+        setMatches(response.data.data || []);
+      } catch {
+        setMatches([]);
+      } finally {
+        setMatchesLoading(false);
+      }
+    };
+
+    fetchMatches();
+
+    return () => controller.abort();
+  }, [property?.id, user]);
 
   const gallery = useMemo(() => {
     if (!property) {
@@ -458,6 +490,33 @@ export default function PropertyDetail() {
 
               <p className="mt-6 text-sm leading-7 text-fog">{property.description}</p>
 
+              {property.socialProof && property.socialProof.colleaguesCount > 0 && (
+                <div className="mt-6 flex items-start gap-3 rounded-[24px] border border-emeraldAccent/20 bg-emeraldAccent/10 p-4 text-sm text-emeraldDark">
+                  <Users2 size={18} className="mt-0.5 shrink-0" />
+                  <div>
+                    <p className="font-semibold">
+                      {property.socialProof.colleaguesCount} people from{" "}
+                      {property.socialProof.companyName} already stay here
+                    </p>
+                    {property.socialProof.colleagueNames.length > 0 && (
+                      <p className="mt-1 text-emeraldDark/80">
+                        Colleagues nearby:{" "}
+                        {property.socialProof.colleagueNames.join(", ")}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {property.socialProof &&
+                property.socialProof.colleaguesCount === 0 &&
+                property.socialProof.residentCount > 0 && (
+                  <div className="mt-6 rounded-[24px] border border-emeraldDark/10 bg-mintMist p-4 text-sm text-inkSlate">
+                    {property.socialProof.residentCount} Urbanly users have already
+                    shortlisted this stay.
+                  </div>
+                )}
+
               <div className="mt-6 grid gap-4 sm:grid-cols-3">
                 <div className="rounded-3xl bg-sandstone/65 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fog">
@@ -537,6 +596,65 @@ export default function PropertyDetail() {
                   </div>
                 ))}
               </div>
+            </div>
+
+            <div className="rounded-[30px] border border-white/70 bg-white/90 p-6 shadow-float backdrop-blur">
+              <div className="flex items-center gap-2 text-emeraldDark">
+                <Users2 size={18} />
+                <h2 className="font-display text-2xl">Roommate matches</h2>
+              </div>
+
+              <p className="mt-3 text-sm leading-6 text-fog">
+                Based on who is targeting this PG and how closely their lifestyle
+                preferences align with yours.
+              </p>
+
+              {matchesLoading ? (
+                <p className="mt-5 text-sm text-fog">Checking compatible roommates...</p>
+              ) : matches.length === 0 ? (
+                <div className="mt-5 rounded-[24px] border border-dashed border-emeraldDark/15 px-4 py-4 text-sm text-fog">
+                  No strong roommate signals yet for this property. Update your
+                  profile preferences and target PG to improve matching.
+                </div>
+              ) : (
+                <div className="mt-5 space-y-4">
+                  {matches.map((match) => (
+                    <div
+                      key={match.userId}
+                      className="rounded-[24px] border border-emeraldDark/10 bg-mintMist/60 p-4"
+                    >
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <p className="text-lg font-semibold text-inkSlate">{match.name}</p>
+                          <p className="mt-1 text-sm text-fog">
+                            {match.company || "Urbanly member"}
+                          </p>
+                        </div>
+                        <div className="rounded-2xl bg-emeraldDark px-3 py-2 text-right text-white">
+                          <p className="text-xs uppercase tracking-[0.18em] text-emeraldSoft">
+                            Match score
+                          </p>
+                          <p className="mt-1 text-2xl font-bold">{match.score}%</p>
+                          <p className="text-xs text-emeraldSoft">{match.label}</p>
+                        </div>
+                      </div>
+
+                      {match.reasons.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {match.reasons.map((reason) => (
+                            <span
+                              key={`${match.userId}-${reason}`}
+                              className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-emeraldDark shadow-sm"
+                            >
+                              {reason}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
 

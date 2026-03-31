@@ -1,5 +1,5 @@
 import type { Property } from "../types/property";
-import { MapPin, CheckCircle, Heart, Star } from "lucide-react";
+import { MapPin, CheckCircle, Heart, Star, Users2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useWishlist } from "../context/WishlistContext";
 import { useAuth } from "../context/AuthContext";
@@ -97,6 +97,28 @@ export default function PropertyCard({ property }: Props) {
           <span className="font-semibold text-inkSlate">{property.rating.toFixed(1)}</span>
           <span>({property.reviewCount} reviews)</span>
         </div>
+
+        {property.socialProof && property.socialProof.colleaguesCount > 0 && (
+          <div className="mt-3 flex items-start gap-2 rounded-2xl bg-emeraldAccent/10 px-3 py-2 text-xs text-emeraldDark">
+            <Users2 size={14} className="mt-0.5 shrink-0" />
+            <p>
+              <span className="font-semibold">
+                {property.socialProof.colleaguesCount} people from{" "}
+                {property.socialProof.companyName}
+              </span>{" "}
+              already picked this stay.
+            </p>
+          </div>
+        )}
+
+        {property.socialProof &&
+          property.socialProof.colleaguesCount === 0 &&
+          property.socialProof.residentCount > 0 && (
+            <p className="mt-3 text-xs text-fog">
+              {property.socialProof.residentCount} Urbanly users are already
+              considering this stay.
+            </p>
+          )}
 
         {/* CTA */}
         <button

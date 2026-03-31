@@ -1,13 +1,132 @@
+import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { LogOut, Mail, UserCircle2 } from "lucide-react";
+import {
+  BriefcaseBusiness,
+  LogOut,
+  Mail,
+  UserCircle2,
+  Users2,
+} from "lucide-react";
+import axios from "axios";
+import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+import type { Property } from "../types/property";
+import type { RoommatePreferences } from "../types/match";
+
+const preferenceOptions = {
+  sleepSchedule: [
+    { value: "", label: "Select sleep style" },
+    { value: "early_bird", label: "Early bird" },
+    { value: "night_owl", label: "Night owl" },
+  ],
+  cleanliness: [
+    { value: "", label: "Select cleanliness level" },
+    { value: "medium", label: "Medium" },
+    { value: "high", label: "High" },
+  ],
+  foodPreference: [
+    { value: "", label: "Select food preference" },
+    { value: "veg", label: "Veg" },
+    { value: "eggetarian", label: "Eggetarian" },
+    { value: "any", label: "Any" },
+  ],
+  socialStyle: [
+    { value: "", label: "Select social style" },
+    { value: "quiet", label: "Quiet" },
+    { value: "balanced", label: "Balanced" },
+    { value: "social", label: "Social" },
+  ],
+  workMode: [
+    { value: "", label: "Select work mode" },
+    { value: "office", label: "Office" },
+    { value: "hybrid", label: "Hybrid" },
+    { value: "remote", label: "Remote" },
+  ],
+};
+
+const emptyPreferences: RoommatePreferences = {
+  sleepSchedule: "",
+  cleanliness: "",
+  foodPreference: "",
+  socialStyle: "",
+  workMode: "",
+  budgetPreference: "",
+};
 
 export default function Profile() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [form, setForm] = useState({
+    name: user?.name || "",
+    company: user?.company || "",
+    currentPropertyId: user?.currentPropertyId || "",
+    preferences: user?.preferences || emptyPreferences,
+  });
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    setForm({
+      name: user.name,
+      company: user.company || "",
+      currentPropertyId: user.currentPropertyId || "",
+      preferences: user.preferences || emptyPreferences,
+    });
+  }, [user]);
+
+  useEffect(() => {
+    const fetchPropertyOptions = async () => {
+      try {
+        const response = await api.get("/properties", {
+          params: { page: 1, limit: 50 },
+        });
+        setProperties(response.data.data || []);
+      } catch {
+        setProperties([]);
+      }
+    };
+
+    fetchPropertyOptions();
+  }, []);
 
   if (!user) {
     return <Navigate to="/login" replace />;
   }
+
+  const selectedProperty = properties.find(
+    (property) => property.id === form.currentPropertyId
+  );
+
+  const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSaving(true);
+    setMessage("");
+    setError("");
+
+    try {
+      const response = await api.patch("/auth/profile", {
+        name: form.name.trim(),
+        company: form.company.trim(),
+        currentPropertyId: form.currentPropertyId,
+        preferences: form.preferences,
+      });
+      updateUser(response.data.user);
+      setMessage("Profile updated. Colleague recommendations are now refreshed.");
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || "Unable to update your profile.");
+      } else {
+        setError("Unable to update your profile.");
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="min-h-screen px-4 py-8">
@@ -64,30 +183,283 @@ export default function Profile() {
               </div>
               <div className="rounded-3xl bg-mintMist p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-fog">
-                  User ID
+                  Company
                 </p>
-                <p className="mt-2 text-lg font-semibold text-inkSlate">{user.id}</p>
+                <p className="mt-2 text-lg font-semibold text-inkSlate">
+                  {user.company || "Add your company"}
+                </p>
               </div>
               <div className="rounded-3xl bg-mintMist p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-fog">
-                  Session
+                  Current or target PG
                 </p>
                 <p className="mt-2 text-lg font-semibold text-inkSlate">
-                  Persisted locally
+                  {selectedProperty?.title || "Not selected yet"}
                 </p>
               </div>
             </div>
+
+            <form className="mt-6 space-y-4" onSubmit={handleSave}>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block space-y-2">
+                  <span className="text-sm font-semibold text-inkSlate">Full name</span>
+                  <input
+                    type="text"
+                    value={form.name}
+                    onChange={(event) =>
+                      setForm((prev) => ({ ...prev, name: event.target.value }))
+                    }
+                    className="w-full rounded-2xl border border-emeraldDark/10 bg-white px-4 py-3 outline-none transition focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10"
+                  />
+                </label>
+
+                <label className="block space-y-2">
+                  <span className="text-sm font-semibold text-inkSlate">Company</span>
+                  <div className="relative">
+                    <BriefcaseBusiness
+                      size={16}
+                      className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-fog"
+                    />
+                    <input
+                      type="text"
+                      value={form.company}
+                      onChange={(event) =>
+                        setForm((prev) => ({ ...prev, company: event.target.value }))
+                      }
+                      placeholder="Infosys, Accenture, TCS..."
+                      className="w-full rounded-2xl border border-emeraldDark/10 bg-white px-11 py-3 outline-none transition focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10"
+                    />
+                  </div>
+                </label>
+              </div>
+
+              <label className="block space-y-2">
+                <span className="text-sm font-semibold text-inkSlate">
+                  Current or target PG
+                </span>
+                <select
+                  value={form.currentPropertyId}
+                  onChange={(event) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      currentPropertyId: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-2xl border border-emeraldDark/10 bg-white px-4 py-3 outline-none transition focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10"
+                >
+                  <option value="">Select later</option>
+                  {properties.map((property) => (
+                    <option key={property.id} value={property.id}>
+                      {property.title} • {property.location}
+                    </option>
+                  ))}
+                </select>
+                <span className="text-sm text-fog">
+                  We use this to show where colleagues from your company are already
+                  living or shortlisting.
+                </span>
+              </label>
+
+              <div className="rounded-[24px] border border-emeraldDark/10 bg-mintMist/60 p-4">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emeraldAccent">
+                  Roommate preferences
+                </p>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <label className="block space-y-2">
+                    <span className="text-sm font-semibold text-inkSlate">
+                      Sleep schedule
+                    </span>
+                    <select
+                      value={form.preferences.sleepSchedule}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          preferences: {
+                            ...prev.preferences,
+                            sleepSchedule: event.target.value,
+                          },
+                        }))
+                      }
+                      className="w-full rounded-2xl border border-emeraldDark/10 bg-white px-4 py-3 outline-none transition focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10"
+                    >
+                      {preferenceOptions.sleepSchedule.map((option) => (
+                        <option key={option.value || "sleep-empty"} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="block space-y-2">
+                    <span className="text-sm font-semibold text-inkSlate">
+                      Cleanliness
+                    </span>
+                    <select
+                      value={form.preferences.cleanliness}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          preferences: {
+                            ...prev.preferences,
+                            cleanliness: event.target.value,
+                          },
+                        }))
+                      }
+                      className="w-full rounded-2xl border border-emeraldDark/10 bg-white px-4 py-3 outline-none transition focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10"
+                    >
+                      {preferenceOptions.cleanliness.map((option) => (
+                        <option
+                          key={option.value || "cleanliness-empty"}
+                          value={option.value}
+                        >
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="block space-y-2">
+                    <span className="text-sm font-semibold text-inkSlate">
+                      Food preference
+                    </span>
+                    <select
+                      value={form.preferences.foodPreference}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          preferences: {
+                            ...prev.preferences,
+                            foodPreference: event.target.value,
+                          },
+                        }))
+                      }
+                      className="w-full rounded-2xl border border-emeraldDark/10 bg-white px-4 py-3 outline-none transition focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10"
+                    >
+                      {preferenceOptions.foodPreference.map((option) => (
+                        <option key={option.value || "food-empty"} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="block space-y-2">
+                    <span className="text-sm font-semibold text-inkSlate">
+                      Social style
+                    </span>
+                    <select
+                      value={form.preferences.socialStyle}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          preferences: {
+                            ...prev.preferences,
+                            socialStyle: event.target.value,
+                          },
+                        }))
+                      }
+                      className="w-full rounded-2xl border border-emeraldDark/10 bg-white px-4 py-3 outline-none transition focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10"
+                    >
+                      {preferenceOptions.socialStyle.map((option) => (
+                        <option key={option.value || "social-empty"} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="block space-y-2">
+                    <span className="text-sm font-semibold text-inkSlate">Work mode</span>
+                    <select
+                      value={form.preferences.workMode}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          preferences: {
+                            ...prev.preferences,
+                            workMode: event.target.value,
+                          },
+                        }))
+                      }
+                      className="w-full rounded-2xl border border-emeraldDark/10 bg-white px-4 py-3 outline-none transition focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10"
+                    >
+                      {preferenceOptions.workMode.map((option) => (
+                        <option key={option.value || "work-empty"} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="block space-y-2">
+                    <span className="text-sm font-semibold text-inkSlate">
+                      Comfortable budget
+                    </span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="500"
+                      value={form.preferences.budgetPreference}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          preferences: {
+                            ...prev.preferences,
+                            budgetPreference: event.target.value,
+                          },
+                        }))
+                      }
+                      placeholder="14000"
+                      className="w-full rounded-2xl border border-emeraldDark/10 bg-white px-4 py-3 outline-none transition focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {message && (
+                <div className="rounded-2xl border border-emeraldAccent/20 bg-emeraldAccent/10 px-4 py-3 text-sm text-emeraldDark">
+                  {message}
+                </div>
+              )}
+
+              {error && (
+                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="rounded-2xl bg-emeraldDark px-5 py-3 font-semibold text-white transition hover:bg-emeraldAccent disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {saving ? "Saving..." : "Save profile"}
+              </button>
+            </form>
           </section>
 
           <aside className="rounded-[28px] border border-emeraldDark/10 bg-emeraldDark p-6 text-white shadow-float">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emeraldSoft">
-              Next up
+              Colleague signal
             </p>
-            <h2 className="mt-3 font-display text-2xl">Saved stays and owner tools</h2>
+            <h2 className="mt-3 font-display text-2xl">Make the search smarter</h2>
             <p className="mt-3 text-sm leading-6 text-emeraldSoft/90">
-              Your account layer is now ready for wishlist, booking, and dashboard
-              flows. This page will become the anchor for those product features.
+              Once your company and stay preference are set, Urbanly starts surfacing
+              stronger social proof across the marketplace.
             </p>
+
+            <div className="mt-6 rounded-[24px] bg-white/10 p-4">
+              <div className="flex items-center gap-3">
+                <Users2 size={18} className="text-emeraldSoft" />
+                <div>
+                  <p className="text-sm font-semibold text-white">Colleagues live here</p>
+                  <p className="text-xs text-emeraldSoft">
+                    See properties where people from your company already stay.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="mt-6 space-y-3">
               <Link
                 to="/home"
@@ -100,12 +472,6 @@ export default function Profile() {
                 className="block rounded-2xl bg-emeraldAccent px-4 py-3 text-center font-semibold text-white transition hover:bg-emeraldDark"
               >
                 Open owner dashboard
-              </Link>
-              <Link
-                to="/register"
-                className="block rounded-2xl border border-white/20 px-4 py-3 text-center font-semibold text-white transition hover:bg-white/10"
-              >
-                Create another test account
               </Link>
             </div>
           </aside>

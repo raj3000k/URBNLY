@@ -26,5 +26,11 @@ export interface Property {
     responseTime: string;
     role: string;
   };
+  socialProof?: {
+    residentCount: number;
+    colleaguesCount: number;
+    companyName: string;
+    colleagueNames: string[];
+  };
   commute?: CommuteInfo;
 }

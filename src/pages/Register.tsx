@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 type FormState = {
   name: string;
   email: string;
+  company: string;
   password: string;
   confirmPassword: string;
 };
@@ -15,6 +16,7 @@ export default function Register() {
   const [form, setForm] = useState<FormState>({
     name: "",
     email: "",
+    company: "",
     password: "",
     confirmPassword: "",
   });
@@ -66,6 +68,7 @@ export default function Register() {
       const response = await api.post("/auth/register", {
         name: form.name.trim(),
         email: form.email.trim(),
+        company: form.company.trim(),
         password: form.password,
       });
 
@@ -113,6 +116,16 @@ export default function Register() {
               value={form.email}
               onChange={updateField("email")}
               placeholder="you@example.com"
+              className="w-full rounded-2xl border border-emeraldDark/10 bg-white px-4 py-3 outline-none transition focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10"
+            />
+          </label>
+
+          <label className="block space-y-2">
+            <span className="text-sm font-semibold text-inkSlate">Company</span>
+            <input
+              value={form.company}
+              onChange={updateField("company")}
+              placeholder="Infosys, TCS, Wipro..."
               className="w-full rounded-2xl border border-emeraldDark/10 bg-white px-4 py-3 outline-none transition focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10"
             />
           </label>

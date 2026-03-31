@@ -4,12 +4,23 @@ export type User = {
   id: string;
   name: string;
   email: string;
+  company?: string;
+  currentPropertyId?: string;
+  preferences?: {
+    sleepSchedule?: string;
+    cleanliness?: string;
+    foodPreference?: string;
+    socialStyle?: string;
+    workMode?: string;
+    budgetPreference?: string;
+  };
 };
 
 type AuthContextType = {
   user: User | null;
   login: (user: User, token: string) => void;
   logout: () => void;
+  updateUser: (user: User) => void;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -31,6 +42,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(user);
   };
 
+  const updateUser = (user: User) => {
+    localStorage.setItem("user", JSON.stringify(user));
+    setUser(user);
+  };
+
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -38,7 +54,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
