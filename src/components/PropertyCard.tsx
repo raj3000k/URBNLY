@@ -98,6 +98,19 @@ export default function PropertyCard({ property }: Props) {
           <span>({property.reviewCount} reviews)</span>
         </div>
 
+        {property.socialProof && (
+          <div className="mt-3 flex flex-wrap gap-2 text-xs">
+            <span className="rounded-full bg-mintMist px-3 py-1 font-semibold text-emeraldDark">
+              {property.socialProof.interestedLabel}
+            </span>
+            {property.capacity > 1 && property.socialProof.roommateSeekersCount > 0 && (
+              <span className="rounded-full bg-sandstone/80 px-3 py-1 font-semibold text-inkSlate">
+                {property.socialProof.roommateSeekersCount} looking for roommate
+              </span>
+            )}
+          </div>
+        )}
+
         {property.socialProof && property.socialProof.colleaguesCount > 0 && (
           <div className="mt-3 flex items-start gap-2 rounded-2xl bg-emeraldAccent/10 px-3 py-2 text-xs text-emeraldDark">
             <Users2 size={14} className="mt-0.5 shrink-0" />
@@ -106,7 +119,7 @@ export default function PropertyCard({ property }: Props) {
                 {property.socialProof.colleaguesCount} people from{" "}
                 {property.socialProof.companyName}
               </span>{" "}
-              already picked this stay.
+              are already interested here.
             </p>
           </div>
         )}
@@ -115,8 +128,7 @@ export default function PropertyCard({ property }: Props) {
           property.socialProof.colleaguesCount === 0 &&
           property.socialProof.residentCount > 0 && (
             <p className="mt-3 text-xs text-fog">
-              {property.socialProof.residentCount} Urbanly users are already
-              considering this stay.
+              {property.socialProof.interestedLabel} on Urbanly right now.
             </p>
           )}
 

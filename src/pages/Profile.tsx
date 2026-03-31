@@ -60,6 +60,7 @@ export default function Profile() {
     name: user?.name || "",
     company: user?.company || "",
     currentPropertyId: user?.currentPropertyId || "",
+    lookingForRoommate: user?.lookingForRoommate || false,
     preferences: user?.preferences || emptyPreferences,
   });
   const [saving, setSaving] = useState(false);
@@ -75,6 +76,7 @@ export default function Profile() {
       name: user.name,
       company: user.company || "",
       currentPropertyId: user.currentPropertyId || "",
+      lookingForRoommate: user.lookingForRoommate || false,
       preferences: user.preferences || emptyPreferences,
     });
   }, [user]);
@@ -113,10 +115,11 @@ export default function Profile() {
         name: form.name.trim(),
         company: form.company.trim(),
         currentPropertyId: form.currentPropertyId,
+        lookingForRoommate: form.lookingForRoommate,
         preferences: form.preferences,
       });
       updateUser(response.data.user);
-      setMessage("Profile updated. Colleague recommendations are now refreshed.");
+      setMessage("Profile updated. Your discovery and roommate recommendations are refreshed.");
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setError(err.response?.data?.message || "Unable to update your profile.");
@@ -258,6 +261,27 @@ export default function Profile() {
                   We use this to show where colleagues from your company are already
                   living or shortlisting.
                 </span>
+              </label>
+
+              <label className="flex items-start gap-3 rounded-[24px] border border-emeraldDark/10 bg-white px-4 py-4">
+                <input
+                  type="checkbox"
+                  checked={form.lookingForRoommate}
+                  onChange={(event) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      lookingForRoommate: event.target.checked,
+                    }))
+                  }
+                  className="mt-1 h-4 w-4 rounded border-emeraldDark/20 text-emeraldDark focus:ring-emeraldAccent"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-inkSlate">I’m looking for a roommate</p>
+                  <p className="mt-1 text-sm text-fog">
+                    Turn this on if you want to appear in roommate matches for your
+                    selected PG. Only your first name will be shown.
+                  </p>
+                </div>
               </label>
 
               <div className="rounded-[24px] border border-emeraldDark/10 bg-mintMist/60 p-4">

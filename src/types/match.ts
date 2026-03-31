@@ -9,10 +9,10 @@ export interface RoommatePreferences {
 
 export interface RoommateMatch {
   userId: string;
-  name: string;
-  email: string;
+  firstName: string;
   company: string;
   currentPropertyId: string;
+  lookingForRoommate: boolean;
   score: number;
   label: string;
   reasons: string[];

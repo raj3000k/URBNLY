@@ -6,6 +6,7 @@ export type User = {
   email: string;
   company?: string;
   currentPropertyId?: string;
+  lookingForRoommate?: boolean;
   preferences?: {
     sleepSchedule?: string;
     cleanliness?: string;

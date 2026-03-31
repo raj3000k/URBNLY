@@ -13,6 +13,7 @@ export interface Property {
   distance: string;
   rating: number;
   reviewCount: number;
+  capacity: number;
   description: string;
   roomType: string;
   deposit: number;
@@ -28,6 +29,10 @@ export interface Property {
   };
   socialProof?: {
     residentCount: number;
+    interestedCount: number;
+    roommateSeekersCount: number;
+    capacity: number;
+    interestedLabel: string;
     colleaguesCount: number;
     companyName: string;
     colleagueNames: string[];
