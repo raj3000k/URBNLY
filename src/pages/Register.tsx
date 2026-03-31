@@ -89,7 +89,7 @@ export default function Register() {
     <div className="min-h-screen bg-hero-grid bg-hero-grid px-4 py-10">
       <div className="mx-auto max-w-lg rounded-[28px] border border-white/70 bg-white/90 p-8 shadow-float backdrop-blur">
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emeraldAccent">
-          Urbanly
+          URBNLY
         </p>
         <h1 className="mt-3 font-display text-3xl text-emeraldDark">
           Create your account

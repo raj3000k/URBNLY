@@ -360,7 +360,7 @@ export default function Home() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <Link to="/home" className="text-2xl font-semibold text-emeraldDark">
-          Urbanly
+          URBNLY
         </Link>
 
         {user && (

@@ -128,7 +128,7 @@ export default function PropertyCard({ property }: Props) {
           property.socialProof.colleaguesCount === 0 &&
           property.socialProof.residentCount > 0 && (
             <p className="mt-3 text-xs text-fog">
-              {property.socialProof.interestedLabel} on Urbanly right now.
+              {property.socialProof.interestedLabel} on URBNLY right now.
             </p>
           )}
 

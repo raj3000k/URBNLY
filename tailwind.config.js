@@ -13,8 +13,8 @@ export default {
         fog: '#6B7280',
       },
       fontFamily: {
-        display: ['Space Grotesk', 'sans-serif'],
-        body: ['Manrope', 'sans-serif'],
+        display: ['"Plus Jakarta Sans"', 'sans-serif'],
+        body: ['Inter', 'sans-serif'],
       },
       boxShadow: {
         float: '0 20px 50px rgba(15, 92, 74, 0.12)',

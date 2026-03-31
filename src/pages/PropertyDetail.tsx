@@ -388,7 +388,7 @@ export default function PropertyDetail() {
                 property.socialProof.colleaguesCount === 0 &&
                 property.socialProof.residentCount > 0 && (
                   <div className="mt-6 rounded-[24px] border border-emeraldDark/10 bg-mintMist p-4 text-sm text-inkSlate">
-                    {property.socialProof.residentCount} Urbanly users have already
+                    {property.socialProof.residentCount} URBNLY users have already
                     shortlisted this stay.
                   </div>
                 )}
@@ -527,7 +527,7 @@ export default function PropertyDetail() {
                             {match.firstName}
                           </p>
                           <p className="mt-1 text-sm text-fog">
-                            {match.company || "Urbanly member"}
+                            {match.company || "URBNLY member"}
                           </p>
                         </div>
                         <div className="rounded-2xl bg-emeraldDark px-3 py-2 text-right text-white">

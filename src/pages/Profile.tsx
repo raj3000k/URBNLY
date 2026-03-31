@@ -468,7 +468,7 @@ export default function Profile() {
             </p>
             <h2 className="mt-3 font-display text-2xl">Make the search smarter</h2>
             <p className="mt-3 text-sm leading-6 text-emeraldSoft/90">
-              Once your company and stay preference are set, Urbanly starts surfacing
+              Once your company and stay preference are set, URBNLY starts surfacing
               stronger social proof across the marketplace.
             </p>
 

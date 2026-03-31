@@ -1,73 +1,78 @@
-# React + TypeScript + Vite
+# URBNLY Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite frontend for URBNLY.
 
-Currently, two official plugins are available:
+## Prerequisites
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js 18+
+- Yarn 1.x
+- Backend running locally on `http://localhost:5000`
 
-## React Compiler
+## 1. Clone and install
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone <your-frontend-repo-url>
+cd URBNLY
+yarn install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 2. Configure environment
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Create a local env file from the example:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env
 ```
+
+Default frontend env:
+
+```env
+VITE_API_BASE_URL=http://localhost:5000/api
+```
+
+If your backend runs on another URL, update `VITE_API_BASE_URL`.
+
+## 3. Run the frontend
+
+```bash
+yarn dev
+```
+
+Vite will print the local URL, usually:
+
+```text
+http://localhost:5173
+```
+
+## 4. Build for production
+
+```bash
+yarn build
+```
+
+## Local full-stack flow
+
+This frontend depends on the backend and database.
+
+Run them in this order:
+
+1. Start PostgreSQL from the backend repo with Docker
+2. Start the backend on `http://localhost:5000`
+3. Start this frontend with `yarn dev`
+
+## Main features
+
+- Auth flow with login and register
+- Premium landing page and app home
+- Property search, filters, and sorting
+- Wishlist and profile
+- Owner dashboard
+- Commute-based recommendations
+- Roommate matching and social proof
+
+## Related repos
+
+- Frontend: this repo
+- Backend: `urbnly-backend`
+
+The backend README explains database setup and Prisma migration steps.
