@@ -372,16 +372,22 @@ export default function Home() {
               Saved
             </Link>
             <Link
+              to="/visits"
+              className="rounded-lg border border-emeraldDark/10 px-3 py-1 text-sm font-semibold text-emeraldDark"
+            >
+              Visits
+            </Link>
+            <Link
+              to="/interested"
+              className="rounded-lg border border-emeraldDark/10 px-3 py-1 text-sm font-semibold text-emeraldDark"
+            >
+              Interested
+            </Link>
+            <Link
               to="/profile"
               className="rounded-lg border border-emeraldDark/10 px-3 py-1 text-sm font-semibold text-emeraldDark"
             >
               {user.name.split(" ")[0]}
-            </Link>
-            <Link
-              to="/dashboard"
-              className="rounded-lg border border-emeraldDark/10 px-3 py-1 text-sm font-semibold text-emeraldDark"
-            >
-              Dashboard
             </Link>
             <button
               onClick={logout}

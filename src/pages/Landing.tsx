@@ -6,6 +6,7 @@ import {
   Building2,
   Clock3,
   Heart,
+  KeyRound,
   MapPinned,
   ShieldCheck,
   Sparkles,
@@ -91,6 +92,8 @@ const heroImages = [
 
 export default function Landing() {
   const { user } = useAuth();
+  const customerEntry = user ? (user.role === "owner" ? "/dashboard" : "/interested") : "/login";
+  const ownerEntry = user ? (user.role === "owner" ? "/dashboard" : "/interested") : "/owner/login";
 
   return (
     <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.2),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(15,92,74,0.12),transparent_26%),linear-gradient(135deg,#f5fbf7_0%,#edf8f2_48%,#f8f0e5_100%)]">
@@ -114,16 +117,22 @@ export default function Landing() {
 
           <div className="flex flex-wrap gap-3">
             <Link
-              to={user ? "/home" : "/login"}
+              to={customerEntry}
               className="rounded-2xl border border-emeraldDark/10 px-4 py-3 text-sm font-semibold text-emeraldDark transition hover:bg-mintMist"
             >
-              {user ? "Open app" : "Login"}
+              {user ? "Open app" : "Customer login"}
             </Link>
             <Link
-              to={user ? "/home" : "/register"}
+              to={user ? customerEntry : "/register"}
               className="rounded-2xl bg-emeraldDark px-4 py-3 text-sm font-semibold text-white transition hover:bg-emeraldAccent"
             >
-              {user ? "Go to home" : "Create account"}
+              {user ? "Go to workspace" : "Create account"}
+            </Link>
+            <Link
+              to={ownerEntry}
+              className="rounded-2xl border border-emeraldDark/10 bg-white/80 px-4 py-3 text-sm font-semibold text-emeraldDark transition hover:bg-sandstone/70"
+            >
+              {user?.role === "owner" ? "Owner portal" : "Owner login"}
             </Link>
           </div>
         </motion.header>
@@ -167,18 +176,51 @@ export default function Landing() {
               className="mt-8 flex flex-wrap gap-4"
             >
               <Link
-                to={user ? "/home" : "/register"}
+                to={user ? customerEntry : "/register"}
                 className="inline-flex items-center gap-2 rounded-2xl bg-emeraldDark px-5 py-4 font-semibold text-white transition hover:bg-emeraldAccent"
               >
-                {user ? "Enter URBNLY" : "Start your search"}
+                {user ? "Open seeker workspace" : "Start your search"}
                 <ArrowRight size={18} />
               </Link>
               <Link
-                to={user ? "/home" : "/login"}
+                to={user ? ownerEntry : "/owner/login"}
                 className="rounded-2xl border border-emeraldDark/10 bg-white/80 px-5 py-4 font-semibold text-emeraldDark transition hover:bg-mintMist"
               >
-                {user ? "Browse premium stays" : "I already have an account"}
+                {user?.role === "owner" ? "Manage listings" : "List your property"}
               </Link>
+            </motion.div>
+
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              custom={0.3}
+              variants={fadeUp}
+              className="mt-8 grid gap-4 md:grid-cols-2"
+            >
+              <div className="rounded-[28px] border border-emeraldDark/10 bg-white/85 p-5 shadow-sm backdrop-blur">
+                <div className="flex items-center gap-3 text-emeraldDark">
+                  <Sparkles size={18} />
+                  <p className="text-sm font-semibold uppercase tracking-[0.2em]">For customers</p>
+                </div>
+                <h3 className="mt-4 font-display text-2xl text-emeraldDark">
+                  Search, shortlist, visit, decide
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-fog">
+                  A modern seeker flow inspired by the best property platforms: interested workspace, saved stays, visits, and commute-led discovery.
+                </p>
+              </div>
+              <div className="rounded-[28px] border border-emeraldDark/10 bg-white/85 p-5 shadow-sm backdrop-blur">
+                <div className="flex items-center gap-3 text-emeraldDark">
+                  <KeyRound size={18} />
+                  <p className="text-sm font-semibold uppercase tracking-[0.2em]">For owners</p>
+                </div>
+                <h3 className="mt-4 font-display text-2xl text-emeraldDark">
+                  Separate owner portal, cleaner operations
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-fog">
+                  Keep inventory live, manage visit requests, and work from a dedicated owner dashboard instead of mixing host tools into the customer journey.
+                </p>
+              </div>
             </motion.div>
 
             <motion.div

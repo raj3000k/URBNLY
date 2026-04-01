@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   BedDouble,
+  CalendarDays,
   ChevronLeft,
   ChevronRight,
   Heart,
@@ -55,11 +56,26 @@ export default function PropertyDetail() {
   const [matches, setMatches] = useState<RoommateMatch[]>([]);
   const [matchesLoading, setMatchesLoading] = useState(false);
   const [commuteLoading, setCommuteLoading] = useState(false);
+  const [visitDateTime, setVisitDateTime] = useState("");
+  const [visitPhone, setVisitPhone] = useState("");
+  const [visitNotes, setVisitNotes] = useState("");
+  const [visitSubmitting, setVisitSubmitting] = useState(false);
+  const [visitMessage, setVisitMessage] = useState("");
+  const [visitError, setVisitError] = useState("");
   const { toggleWishlist, isSaved } = useWishlist();
   const { user } = useAuth();
 
+  const visitFormId = "schedule-visit-form";
+
   useEffect(() => {
     setActiveImageIndex(0);
+  }, [property?.id]);
+
+  useEffect(() => {
+    const tomorrow = new Date(Date.now() + 1000 * 60 * 60 * 24);
+    tomorrow.setMinutes(0, 0, 0);
+    tomorrow.setHours(11);
+    setVisitDateTime(tomorrow.toISOString().slice(0, 16));
   }, [property?.id]);
 
   useEffect(() => {
@@ -230,6 +246,42 @@ export default function PropertyDetail() {
 
   const saved = isSaved(property.id);
   const activeImage = gallery[activeImageIndex] || property.image;
+
+  const handleScheduleVisit = async () => {
+    if (!visitDateTime) {
+      setVisitError("Please choose a preferred visit time.");
+      return;
+    }
+
+    if (!visitPhone.trim()) {
+      setVisitError("Please enter your phone number.");
+      return;
+    }
+
+    setVisitSubmitting(true);
+    setVisitError("");
+    setVisitMessage("");
+
+    try {
+      const response = await api.post("/visits", {
+        propertyId: property.id,
+        scheduledFor: new Date(visitDateTime).toISOString(),
+        phone: visitPhone.trim(),
+        notes: visitNotes.trim(),
+      });
+
+      setVisitMessage(response.data.message || "Visit scheduled successfully.");
+      setVisitNotes("");
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setVisitError(err.response?.data?.message || "Unable to schedule your visit");
+      } else {
+        setVisitError("Unable to schedule your visit");
+      }
+    } finally {
+      setVisitSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-mintMist via-white to-sandstone/60 pb-28">
@@ -625,13 +677,96 @@ export default function PropertyDetail() {
                 Online token payments are coming soon.
               </p>
             </div>
+
+            <div
+              id={visitFormId}
+              className="rounded-[30px] border border-white/70 bg-white/90 p-6 shadow-float backdrop-blur"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-fog">
+                    In-person visit
+                  </p>
+                  <h2 className="mt-2 font-display text-2xl text-emeraldDark">
+                    Schedule a visit
+                  </h2>
+                </div>
+                <div className="rounded-2xl bg-mintMist px-3 py-2 text-xs font-semibold text-emeraldDark">
+                  Free
+                </div>
+              </div>
+
+              <p className="mt-4 text-sm leading-6 text-fog">
+                Pick a time that works for you. The owner can confirm it from their dashboard.
+              </p>
+
+              <div className="mt-5 space-y-4">
+                <label className="block space-y-2">
+                  <span className="text-sm font-semibold text-inkSlate">Visit date & time</span>
+                  <input
+                    type="datetime-local"
+                    value={visitDateTime}
+                    onChange={(event) => setVisitDateTime(event.target.value)}
+                    className="w-full rounded-2xl border border-emeraldDark/10 px-4 py-3 outline-none transition focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10"
+                  />
+                </label>
+
+                <label className="block space-y-2">
+                  <span className="text-sm font-semibold text-inkSlate">Phone number</span>
+                  <input
+                    value={visitPhone}
+                    onChange={(event) => setVisitPhone(event.target.value)}
+                    placeholder="+91 98XXXXXXXX"
+                    className="w-full rounded-2xl border border-emeraldDark/10 px-4 py-3 outline-none transition focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10"
+                  />
+                </label>
+
+                <label className="block space-y-2">
+                  <span className="text-sm font-semibold text-inkSlate">Anything to mention?</span>
+                  <textarea
+                    value={visitNotes}
+                    onChange={(event) => setVisitNotes(event.target.value)}
+                    placeholder="Preferred room type, arrival time, or what you want to check on the visit."
+                    rows={3}
+                    className="w-full rounded-2xl border border-emeraldDark/10 px-4 py-3 outline-none transition focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10"
+                  />
+                </label>
+
+                {visitError && (
+                  <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    {visitError}
+                  </p>
+                )}
+
+                {visitMessage && (
+                  <p className="rounded-2xl border border-emeraldAccent/20 bg-emeraldSoft px-4 py-3 text-sm text-emeraldDark">
+                    {visitMessage}
+                  </p>
+                )}
+
+                <button
+                  onClick={handleScheduleVisit}
+                  disabled={visitSubmitting}
+                  className="w-full rounded-2xl bg-emeraldDark px-5 py-3 font-semibold text-white transition hover:bg-emeraldAccent disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {visitSubmitting ? "Scheduling visit..." : "Confirm visit request"}
+                </button>
+              </div>
+            </div>
           </aside>
         </div>
       </div>
 
       <div className="fixed inset-x-0 bottom-0 border-t border-emeraldDark/10 bg-white/90 p-4 backdrop-blur">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row">
-          <button className="flex-1 rounded-2xl border border-emeraldDark/10 px-5 py-3 font-semibold text-emeraldDark transition hover:bg-mintMist">
+          <button
+            onClick={() => {
+              const form = document.getElementById(visitFormId);
+              form?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-emeraldDark/10 px-5 py-3 font-semibold text-emeraldDark transition hover:bg-mintMist"
+          >
+            <CalendarDays size={18} />
             Schedule a visit
           </button>
           <button

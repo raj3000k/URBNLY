@@ -26,7 +26,7 @@ export default function Register() {
   const { login, user } = useAuth();
 
   if (user) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to={user.role === "owner" ? "/dashboard" : "/interested"} replace />;
   }
 
   const validationMessage = useMemo(() => {
@@ -73,7 +73,7 @@ export default function Register() {
       });
 
       login(response.data.user, response.data.token);
-      navigate("/home", { replace: true });
+      navigate("/interested", { replace: true });
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setError(err.response?.data?.message || "Unable to create your account.");

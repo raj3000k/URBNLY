@@ -4,6 +4,7 @@ export type User = {
   id: string;
   name: string;
   email: string;
+  role: "customer" | "owner";
   company?: string;
   currentPropertyId?: string;
   lookingForRoommate?: boolean;
@@ -26,14 +27,54 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+const normalizeStoredUser = (value: unknown): User | null => {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const candidate = value as Partial<User>;
+
+  if (!candidate.id || !candidate.name || !candidate.email) {
+    return null;
+  }
+
+  return {
+    id: String(candidate.id),
+    name: String(candidate.name),
+    email: String(candidate.email),
+    role: candidate.role === "owner" ? "owner" : "customer",
+    company: typeof candidate.company === "string" ? candidate.company : "",
+    currentPropertyId:
+      typeof candidate.currentPropertyId === "string" ? candidate.currentPropertyId : "",
+    lookingForRoommate: Boolean(candidate.lookingForRoommate),
+    preferences:
+      candidate.preferences && typeof candidate.preferences === "object"
+        ? candidate.preferences
+        : undefined,
+  };
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setUser(JSON.parse(storedUser));
+      try {
+        const parsedUser = normalizeStoredUser(JSON.parse(storedUser));
+
+        if (parsedUser) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setUser(parsedUser);
+          localStorage.setItem("user", JSON.stringify(parsedUser));
+        } else {
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
+        }
+      } catch {
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+      }
     }
   }, []);
 

@@ -14,6 +14,13 @@ export interface Property {
   rating: number;
   reviewCount: number;
   capacity: number;
+  totalRooms: number;
+  occupiedRooms: number;
+  freeRooms: number;
+  roomInventory: Array<{
+    type: string;
+    count: number;
+  }>;
   description: string;
   roomType: string;
   deposit: number;

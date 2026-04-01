@@ -1,10 +1,10 @@
 import { useState } from "react";
+import axios from "axios";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
-import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 
-export default function Login() {
+export default function OwnerLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -12,10 +12,14 @@ export default function Login() {
   const { login, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectTo = location.state?.from || "/interested";
+  const redirectTo = location.state?.from || "/dashboard";
 
-  if (user) {
-    return <Navigate to={user.role === "owner" ? "/dashboard" : redirectTo} replace />;
+  if (user?.role === "owner") {
+    return <Navigate to={redirectTo} replace />;
+  }
+
+  if (user?.role === "customer") {
+    return <Navigate to="/interested" replace />;
   }
 
   const handleLogin = async () => {
@@ -28,18 +32,18 @@ export default function Login() {
     setError("");
 
     try {
-      const customerRes = await api.post("/auth/customer/login", {
+      const response = await api.post("/auth/owner/login", {
         email: email.trim(),
         password,
       });
 
-      login(customerRes.data.user, customerRes.data.token);
+      login(response.data.user, response.data.token);
       navigate(redirectTo, { replace: true });
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "Login failed");
+        setError(err.response?.data?.message || "Owner login failed");
       } else {
-        setError("Login failed");
+        setError("Owner login failed");
       }
     } finally {
       setSubmitting(false);
@@ -50,19 +54,19 @@ export default function Login() {
     <div className="min-h-screen bg-hero-grid bg-hero-grid px-4 py-10">
       <div className="mx-auto max-w-md rounded-[28px] border border-white/70 bg-white/90 p-8 shadow-float backdrop-blur">
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emeraldAccent">
-          URBNLY
+          URBNLY OWNER
         </p>
-        <h1 className="mt-3 font-display text-3xl text-emeraldDark">Welcome back</h1>
+        <h1 className="mt-3 font-display text-3xl text-emeraldDark">Owner portal</h1>
         <p className="mt-2 text-sm text-fog">
-          Sign in as a customer to continue into your stay search workspace.
+          Sign in to manage listings, review visit requests, and keep inventory live.
         </p>
 
         <div className="mt-8 space-y-4">
           <label className="block space-y-2">
-            <span className="text-sm font-semibold text-inkSlate">Email</span>
+            <span className="text-sm font-semibold text-inkSlate">Owner email</span>
             <input
               value={email}
-              placeholder="you@example.com"
+              placeholder="host@example.com"
               className="w-full rounded-2xl border border-emeraldDark/10 bg-white px-4 py-3 outline-none transition focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10"
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -91,20 +95,13 @@ export default function Login() {
           disabled={submitting}
           className="mt-6 w-full rounded-2xl bg-emeraldDark px-4 py-3 font-semibold text-white transition hover:bg-emeraldAccent disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {submitting ? "Signing in..." : "Login"}
+          {submitting ? "Signing in..." : "Enter owner portal"}
         </button>
 
         <p className="mt-6 text-center text-sm text-fog">
-          New here?{" "}
-          <Link to="/register" className="font-semibold text-emeraldDark">
-            Create an account
-          </Link>
-        </p>
-
-        <p className="mt-3 text-center text-sm text-fog">
-          Listing a property?{" "}
-          <Link to="/owner/login" className="font-semibold text-emeraldDark">
-            Use owner login
+          Looking for a stay?{" "}
+          <Link to="/login" className="font-semibold text-emeraldDark">
+            Use customer login
           </Link>
         </p>
       </div>

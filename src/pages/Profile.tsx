@@ -485,18 +485,35 @@ export default function Profile() {
             </div>
 
             <div className="mt-6 space-y-3">
-              <Link
-                to="/home"
-                className="block rounded-2xl bg-white px-4 py-3 text-center font-semibold text-emeraldDark transition hover:bg-sandstone"
-              >
-                Explore properties
-              </Link>
-              <Link
-                to="/dashboard"
-                className="block rounded-2xl bg-emeraldAccent px-4 py-3 text-center font-semibold text-white transition hover:bg-emeraldDark"
-              >
-                Open owner dashboard
-              </Link>
+              {user.role === "customer" ? (
+                <>
+                  <Link
+                    to="/home"
+                    className="block rounded-2xl bg-white px-4 py-3 text-center font-semibold text-emeraldDark transition hover:bg-sandstone"
+                  >
+                    Explore properties
+                  </Link>
+                  <Link
+                    to="/interested"
+                    className="block rounded-2xl bg-sandstone px-4 py-3 text-center font-semibold text-emeraldDark transition hover:bg-white"
+                  >
+                    Open interested workspace
+                  </Link>
+                  <Link
+                    to="/visits"
+                    className="block rounded-2xl bg-emeraldAccent px-4 py-3 text-center font-semibold text-white transition hover:bg-emeraldDark"
+                  >
+                    My scheduled visits
+                  </Link>
+                </>
+              ) : (
+                <Link
+                  to="/dashboard"
+                  className="block rounded-2xl bg-white px-4 py-3 text-center font-semibold text-emeraldDark transition hover:bg-sandstone"
+                >
+                  Open owner dashboard
+                </Link>
+              )}
             </div>
           </aside>
         </div>
