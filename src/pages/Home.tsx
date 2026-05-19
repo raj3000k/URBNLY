@@ -6,6 +6,7 @@ import RecommendationBanner from "../components/RecommendationBanner";
 import Filters from "../components/Filters";
 import SkeletonCard from "../components/SkeletonCard";
 import SortBar, { type SortOption } from "../components/SortBar";
+import BrandLogo from "../components/BrandLogo";
 import type { Property } from "../types/property";
 import useDebounce from "../hooks/useDebounce";
 import { useAuth } from "../context/AuthContext";
@@ -359,8 +360,8 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50 p-4 space-y-4">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <Link to="/home" className="text-2xl font-semibold text-emeraldDark">
-          URBNLY
+        <Link to="/home" className="inline-flex items-center">
+          <BrandLogo subtitle="Premium city stays" />
         </Link>
 
         {user && (

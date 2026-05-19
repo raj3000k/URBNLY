@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import axios from "axios";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+import BrandLogo from "../components/BrandLogo";
 
 type FormState = {
   name: string;
@@ -88,9 +89,7 @@ export default function Register() {
   return (
     <div className="min-h-screen bg-hero-grid bg-hero-grid px-4 py-10">
       <div className="mx-auto max-w-lg rounded-[28px] border border-white/70 bg-white/90 p-8 shadow-float backdrop-blur">
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emeraldAccent">
-          URBNLY
-        </p>
+        <BrandLogo subtitle="Premium city stays" />
         <h1 className="mt-3 font-display text-3xl text-emeraldDark">
           Create your account
         </h1>

@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+import BrandLogo from "../components/BrandLogo";
 
 export default function OwnerLogin() {
   const [email, setEmail] = useState("");
@@ -53,9 +54,7 @@ export default function OwnerLogin() {
   return (
     <div className="min-h-screen bg-hero-grid bg-hero-grid px-4 py-10">
       <div className="mx-auto max-w-md rounded-[28px] border border-white/70 bg-white/90 p-8 shadow-float backdrop-blur">
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-emeraldAccent">
-          URBNLY OWNER
-        </p>
+        <BrandLogo subtitle="Owner portal" />
         <h1 className="mt-3 font-display text-3xl text-emeraldDark">Owner portal</h1>
         <p className="mt-2 text-sm text-fog">
           Sign in to manage listings, review visit requests, and keep inventory live.

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 150" role="img" aria-labelledby="title desc">
+  <title id="title">URBNLY logo</title>
+  <desc id="desc">URBNLY wordmark with an emerald U home monogram.</desc>
+  <defs>
+    <linearGradient id="uGradient" x1="20" y1="12" x2="116" y2="126" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0F5C4A"/>
+      <stop offset="1" stop-color="#0B4B3F"/>
+    </linearGradient>
+    <mask id="homeCutout">
+      <rect width="140" height="140" fill="#fff"/>
+      <path fill="#000" d="M45 89 70 71.5 95 89v39H45V89Z"/>
+      <path fill="#000" d="M36 88 70 64l34 24-9.5 13.2L70 84 45.5 101.2 36 88Z"/>
+    </mask>
+  </defs>
+  <g transform="translate(10 7)">
+    <path
+      fill="url(#uGradient)"
+      mask="url(#homeCutout)"
+      d="M22 12h28v63c0 14.8 7 25.8 20 25.8s20-11 20-25.8V12h28v64.4C118 109.4 98.2 130 70 130S22 109.4 22 76.4V12Z"
+    />
+    <path fill="#10B981" d="M64 95h12v35H64V95Z"/>
+  </g>
+  <g fill="#0F5C4A" font-family="Plus Jakarta Sans, Inter, Arial, sans-serif" font-weight="800" letter-spacing="13">
+    <text x="155" y="96" font-size="58">URBNLY</text>
+  </g>
+  <text x="158" y="126" fill="#6B7280" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="5">
+    PREMIUM CITY STAYS
+  </text>
+</svg>

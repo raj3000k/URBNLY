@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">URBNLY light logo mark</title>
+  <desc id="desc">A light U monogram with a home doorway cutout.</desc>
+  <defs>
+    <mask id="homeCutout">
+      <rect width="128" height="128" fill="#fff"/>
+      <path fill="#000" d="M42 83.5 64 68l22 15.5V118H42V83.5Z"/>
+      <path fill="#000" d="M34.5 82.5 64 61.5l29.5 21-8.5 11.8L64 79.5 43 94.3l-8.5-11.8Z"/>
+    </mask>
+  </defs>
+  <path
+    fill="#F7F8F5"
+    mask="url(#homeCutout)"
+    d="M24 16h25v56.5c0 13.2 5.9 23.1 15 23.1s15-9.9 15-23.1V16h25v57.4c0 29.4-16.6 47.8-40 47.8S24 102.8 24 73.4V16Z"
+  />
+  <path fill="#10B981" d="M59 90h10v31H59V90Z"/>
+</svg>
