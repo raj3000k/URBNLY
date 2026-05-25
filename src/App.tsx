@@ -5,6 +5,7 @@ import PropertyDetail from "./pages/PropertyDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import OwnerLogin from "./pages/OwnerLogin";
+import OwnerRegister from "./pages/OwnerRegister";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import SavedProperties from "./pages/SavedProperties";
@@ -18,6 +19,7 @@ function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/owner/login" element={<OwnerLogin />} />
+      <Route path="/owner/register" element={<OwnerRegister />} />
       <Route path="/register" element={<Register />} />
       <Route
         path="/interested"

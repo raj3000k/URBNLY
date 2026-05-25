@@ -201,11 +201,11 @@ export default function Landing() {
                   <ArrowRight size={18} />
                 </Link>
                 <Link
-                  to={ownerEntry}
+                  to={user ? ownerEntry : "/owner/register"}
                   className="inline-flex items-center gap-2 rounded-lg border border-white/25 bg-white/10 px-5 py-3.5 font-semibold text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white hover:text-emeraldDark"
                 >
                   <KeyRound size={18} />
-                  {user?.role === "owner" ? "Manage listings" : "Owner portal"}
+                  {user?.role === "owner" ? "Manage listings" : "List your property"}
                 </Link>
               </motion.div>
             </div>
@@ -351,10 +351,10 @@ export default function Landing() {
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                to={ownerEntry}
+                to={user ? ownerEntry : "/owner/register"}
                 className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3.5 font-semibold text-emeraldDark transition hover:-translate-y-0.5 hover:bg-emeraldSoft"
               >
-                Open owner portal
+                {user?.role === "owner" ? "Open owner portal" : "Create owner account"}
                 <ArrowRight size={18} />
               </Link>
             </div>

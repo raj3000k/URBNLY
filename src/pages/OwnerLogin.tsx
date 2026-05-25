@@ -98,6 +98,13 @@ export default function OwnerLogin() {
         </button>
 
         <p className="mt-6 text-center text-sm text-fog">
+          New property owner?{" "}
+          <Link to="/owner/register" className="font-semibold text-emeraldDark">
+            Create owner account
+          </Link>
+        </p>
+
+        <p className="mt-3 text-center text-sm text-fog">
           Looking for a stay?{" "}
           <Link to="/login" className="font-semibold text-emeraldDark">
             Use customer login
