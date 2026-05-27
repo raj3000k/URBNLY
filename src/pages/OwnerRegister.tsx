@@ -90,8 +90,8 @@ export default function OwnerRegister() {
   };
 
   return (
-    <div className="min-h-screen bg-hero-grid bg-hero-grid px-4 py-10">
-      <div className="mx-auto max-w-lg rounded-[28px] border border-white/70 bg-white/90 p-8 shadow-float backdrop-blur">
+    <div className="page-enter min-h-screen overflow-x-hidden bg-hero-grid bg-hero-grid px-3 py-6 sm:px-4 sm:py-10">
+      <div className="mx-auto max-w-lg rounded-[24px] border border-white/70 bg-white/90 p-5 shadow-float backdrop-blur sm:rounded-[28px] sm:p-8">
         <BrandLogo subtitle="Owner onboarding" />
         <h1 className="mt-3 font-display text-3xl text-emeraldDark">
           Create owner account

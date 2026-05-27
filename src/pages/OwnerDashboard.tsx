@@ -4,12 +4,14 @@ import {
   Building2,
   CalendarDays,
   CheckCircle2,
+  Edit3,
   Home,
   MapPin,
   Plus,
   PlusCircle,
   Search,
   Trash2,
+  X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../utils/api";
@@ -75,6 +77,44 @@ const splitCsv = (value: string) =>
     .map((item) => item.trim())
     .filter(Boolean);
 
+const joinCsv = (value: string[]) => value.join(", ");
+
+const roomInventoryFromProperty = (property: Property): RoomInventoryItem[] => {
+  if (property.roomInventory.length > 0) {
+    return property.roomInventory.map((item) => ({
+      id: crypto.randomUUID(),
+      type: item.type,
+      count: item.count,
+    }));
+  }
+
+  return [
+    {
+      id: crypto.randomUUID(),
+      type: property.roomType || "Single room",
+      count: Math.max(property.totalRooms || 1, 1),
+    },
+  ];
+};
+
+const formFromProperty = (property: Property): FormState => ({
+  title: property.title,
+  location: property.location,
+  price: String(property.price),
+  distance: property.distance,
+  roomType: property.roomType,
+  deposit: String(property.deposit),
+  image: property.image,
+  images: joinCsv(property.images),
+  description: property.description,
+  highlights: joinCsv(property.highlights),
+  amenities: joinCsv(property.amenities),
+  houseRules: joinCsv(property.houseRules),
+  foodIncluded: property.foodIncluded,
+  totalRooms: property.totalRooms,
+  occupiedRooms: property.occupiedRooms,
+});
+
 export default function OwnerDashboard() {
   const { user } = useAuth();
   const [form, setForm] = useState<FormState>(initialForm);
@@ -91,6 +131,7 @@ export default function OwnerDashboard() {
   const [ownerVisits, setOwnerVisits] = useState<OwnerVisit[]>([]);
   const [loadingVisits, setLoadingVisits] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [editingPropertyId, setEditingPropertyId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const debouncedLocationQuery = useDebounce(locationQuery, 350);
@@ -193,6 +234,7 @@ export default function OwnerDashboard() {
   }, [listings, ownerVisits]);
 
   const freeRooms = Math.max(form.totalRooms - form.occupiedRooms, 0);
+  const isEditing = Boolean(editingPropertyId);
 
   const updateField =
     (field: keyof FormState) =>
@@ -323,7 +365,7 @@ export default function OwnerDashboard() {
     setSuccess("");
 
     try {
-      const response = await api.post("/properties", {
+      const payload = {
         title: form.title,
         location: form.location,
         price: Number(form.price),
@@ -341,24 +383,66 @@ export default function OwnerDashboard() {
         totalRooms: form.totalRooms,
         occupiedRooms: form.occupiedRooms,
         roomInventory: roomInventory.map(({ type, count }) => ({ type, count })),
-      });
+      };
 
-      setListings((current) => [response.data.property as Property, ...current]);
+      const response = editingPropertyId
+        ? await api.patch(`/properties/${editingPropertyId}`, payload)
+        : await api.post("/properties", payload);
+
+      const savedProperty = response.data.property as Property;
+      setListings((current) =>
+        editingPropertyId
+          ? current.map((listing) =>
+              listing.id === editingPropertyId ? savedProperty : listing
+            )
+          : [savedProperty, ...current]
+      );
       setForm(initialForm);
       setLocationQuery("");
       setLocationSuggestions([]);
       setPlacesSessionToken("");
       setRoomInventory(createInitialRoomInventory());
-      setSuccess("Property added to your dashboard.");
+      setEditingPropertyId(null);
+      setSuccess(
+        editingPropertyId
+          ? "Property details updated successfully."
+          : "Property added to your dashboard."
+      );
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "Unable to add property");
+        setError(
+          err.response?.data?.message ||
+            (editingPropertyId ? "Unable to update property" : "Unable to add property")
+        );
       } else {
-        setError("Unable to add property");
+        setError(editingPropertyId ? "Unable to update property" : "Unable to add property");
       }
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const resetPropertyForm = () => {
+    setForm(initialForm);
+    setLocationQuery("");
+    setLocationSuggestions([]);
+    setPlacesSessionToken("");
+    setRoomInventory(createInitialRoomInventory());
+    setEditingPropertyId(null);
+    setError("");
+    setSuccess("");
+  };
+
+  const handleEditListing = (listing: Property) => {
+    setForm(formFromProperty(listing));
+    setLocationQuery(listing.location);
+    setLocationSuggestions([]);
+    setPlacesSessionToken("");
+    setRoomInventory(roomInventoryFromProperty(listing));
+    setEditingPropertyId(listing.id);
+    setError("");
+    setSuccess("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleAvailabilityToggle = async (propertyId: string, available: boolean) => {
@@ -400,15 +484,15 @@ export default function OwnerDashboard() {
   };
 
   return (
-    <div className="min-h-screen px-4 py-8">
+    <div className="min-h-screen overflow-x-hidden px-3 py-5 sm:px-4 sm:py-8">
       <div className="mx-auto max-w-7xl space-y-6">
-        <div className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-float backdrop-blur">
+        <div className="rounded-[24px] border border-white/70 bg-white/90 p-4 shadow-float backdrop-blur sm:rounded-[32px] sm:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emeraldAccent">
                 Owner dashboard
               </p>
-              <h1 className="mt-2 font-display text-3xl text-emeraldDark">
+              <h1 className="mt-2 font-display text-2xl text-emeraldDark sm:text-3xl">
                 Manage your listings, {user?.name.split(" ")[0]}
               </h1>
               <p className="mt-2 max-w-2xl text-sm text-fog">
@@ -416,16 +500,16 @@ export default function OwnerDashboard() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap">
               <Link
                 to="/profile"
-                className="rounded-2xl border border-emeraldDark/10 px-4 py-3 text-sm font-semibold text-emeraldDark transition hover:bg-mintMist"
+                className="rounded-2xl border border-emeraldDark/10 px-4 py-3 text-center text-sm font-semibold text-emeraldDark transition hover:bg-mintMist"
               >
                 Back to profile
               </Link>
               <Link
                 to="/"
-                className="rounded-2xl bg-emeraldDark px-4 py-3 text-sm font-semibold text-white transition hover:bg-emeraldAccent"
+                className="rounded-2xl bg-emeraldDark px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-emeraldAccent"
               >
                 View public site
               </Link>
@@ -473,15 +557,31 @@ export default function OwnerDashboard() {
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <section className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-float backdrop-blur">
-            <div className="flex items-center gap-3">
+          <section className="rounded-[24px] border border-white/70 bg-white/90 p-4 shadow-float backdrop-blur sm:rounded-[32px] sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
               <PlusCircle className="text-emeraldAccent" size={20} />
               <div>
-                <h2 className="font-display text-2xl text-emeraldDark">Add a new property</h2>
+                <h2 className="font-display text-2xl text-emeraldDark">
+                  {isEditing ? "Edit property details" : "Add a new property"}
+                </h2>
                 <p className="text-sm text-fog">
-                  Use assisted location search, room mix controls, and occupancy counters to build a professional listing.
+                  {isEditing
+                    ? "Update your listing details and save changes for users immediately."
+                    : "Use assisted location search, room mix controls, and occupancy counters to build a professional listing."}
                 </p>
               </div>
+              </div>
+              {isEditing && (
+                <button
+                  type="button"
+                  onClick={resetPropertyForm}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emeraldDark/10 px-4 py-3 text-sm font-semibold text-emeraldDark transition hover:bg-mintMist"
+                >
+                  <X size={16} />
+                  Cancel edit
+                </button>
+              )}
             </div>
 
             <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
@@ -527,7 +627,7 @@ export default function OwnerDashboard() {
                 <button
                   type="button"
                   onClick={handleDetectLocation}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emeraldDark/10 px-4 py-3 text-sm font-semibold text-emeraldDark transition hover:bg-mintMist"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-emeraldDark/10 px-4 py-3 text-sm font-semibold text-emeraldDark transition hover:bg-mintMist"
                 >
                   <MapPin size={16} />
                   {detectingLocation ? "Detecting..." : "Detect location"}
@@ -589,7 +689,7 @@ export default function OwnerDashboard() {
                   <button
                     type="button"
                     onClick={addRoomType}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-emeraldDark transition hover:bg-sandstone"
+                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-emeraldDark transition hover:bg-sandstone"
                   >
                     <Plus size={16} />
                     Add room type
@@ -743,16 +843,22 @@ export default function OwnerDashboard() {
                 disabled={submitting || locationLoading}
                 className="w-full rounded-2xl bg-emeraldDark px-5 py-3 font-semibold text-white transition hover:bg-emeraldAccent disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {submitting ? "Adding property..." : "Publish property"}
+                {submitting
+                  ? isEditing
+                    ? "Saving changes..."
+                    : "Adding property..."
+                  : isEditing
+                    ? "Save property changes"
+                    : "Publish property"}
               </button>
             </form>
           </section>
 
-          <section className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-float backdrop-blur">
-            <div className="flex items-center justify-between">
+          <section className="rounded-[24px] border border-white/70 bg-white/90 p-4 shadow-float backdrop-blur sm:rounded-[32px] sm:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="font-display text-2xl text-emeraldDark">Your listings</h2>
-                <p className="text-sm text-fog">Toggle availability live as rooms fill up.</p>
+                <p className="text-sm text-fog">Edit details or toggle availability as rooms fill up.</p>
               </div>
               <button
                 onClick={loadListings}
@@ -773,11 +879,11 @@ export default function OwnerDashboard() {
                 listings.map((listing) => (
                   <div key={listing.id} className="rounded-3xl border border-emeraldDark/10 bg-white p-4">
                     <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                      <div className="flex gap-4">
+                      <div className="flex flex-col gap-4 sm:flex-row">
                         <img
                           src={listing.image}
                           alt={listing.title}
-                          className="h-24 w-24 rounded-2xl object-cover"
+                          className="h-44 w-full rounded-2xl object-cover sm:h-24 sm:w-24"
                         />
                         <div>
                           <h3 className="font-semibold text-inkSlate">{listing.title}</h3>
@@ -794,7 +900,7 @@ export default function OwnerDashboard() {
                         </div>
                       </div>
 
-                      <div className="flex flex-col items-start gap-3 md:items-end">
+                      <div className="flex flex-col items-stretch gap-3 md:items-end">
                         <span
                           className={`rounded-full px-3 py-1 text-xs font-semibold ${
                             listing.available ? "bg-emeraldSoft text-emeraldDark" : "bg-sandstone text-inkSlate"
@@ -802,6 +908,13 @@ export default function OwnerDashboard() {
                         >
                           {listing.available ? "Available" : "Paused"}
                         </span>
+                        <button
+                          onClick={() => handleEditListing(listing)}
+                          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-emeraldDark/10 px-4 py-2 text-sm font-semibold text-emeraldDark transition hover:bg-mintMist"
+                        >
+                          <Edit3 size={16} />
+                          Edit details
+                        </button>
                         <button
                           onClick={() => handleAvailabilityToggle(listing.id, listing.available)}
                           className="rounded-2xl border border-emeraldDark/10 px-4 py-2 text-sm font-semibold text-emeraldDark transition hover:bg-mintMist"
@@ -817,8 +930,8 @@ export default function OwnerDashboard() {
           </section>
         </div>
 
-        <section className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-float backdrop-blur">
-          <div className="flex items-center justify-between">
+        <section className="rounded-[24px] border border-white/70 bg-white/90 p-4 shadow-float backdrop-blur sm:rounded-[32px] sm:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="font-display text-2xl text-emeraldDark">Visit requests</h2>
               <p className="text-sm text-fog">

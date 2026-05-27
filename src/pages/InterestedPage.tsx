@@ -53,15 +53,15 @@ export default function InterestedPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-mintMist via-white to-sandstone/50 px-4 py-8">
+    <div className="page-enter min-h-screen overflow-x-hidden bg-gradient-to-br from-mintMist via-white to-sandstone/50 px-3 py-5 sm:px-4 sm:py-8">
       <div className="mx-auto max-w-6xl space-y-6">
-        <section className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-float backdrop-blur">
+        <section className="rounded-[24px] border border-white/70 bg-white/90 p-4 shadow-float backdrop-blur sm:rounded-[32px] sm:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emeraldAccent">
                 Interested workspace
               </p>
-              <h1 className="mt-2 font-display text-3xl text-emeraldDark">
+              <h1 className="mt-2 font-display text-2xl text-emeraldDark sm:text-3xl">
                 Welcome back, {user?.name.split(" ")[0]}
               </h1>
               <p className="mt-2 max-w-2xl text-sm text-fog">
@@ -69,16 +69,16 @@ export default function InterestedPage() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:flex sm:flex-wrap">
               <Link
                 to="/home"
-                className="rounded-2xl bg-emeraldDark px-4 py-3 text-sm font-semibold text-white transition hover:bg-emeraldAccent"
+                className="rounded-2xl bg-emeraldDark px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-emeraldAccent"
               >
                 Explore listings
               </Link>
               <Link
                 to="/profile"
-                className="rounded-2xl border border-emeraldDark/10 px-4 py-3 text-sm font-semibold text-emeraldDark transition hover:bg-mintMist"
+                className="rounded-2xl border border-emeraldDark/10 px-4 py-3 text-center text-sm font-semibold text-emeraldDark transition hover:bg-mintMist"
               >
                 Update profile
               </Link>
@@ -125,8 +125,8 @@ export default function InterestedPage() {
         )}
 
         <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
-          <section className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-float backdrop-blur">
-            <div className="flex items-center justify-between">
+          <section className="rounded-[24px] border border-white/70 bg-white/90 p-4 shadow-float backdrop-blur sm:rounded-[32px] sm:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="font-display text-2xl text-emeraldDark">Saved properties</h2>
                 <p className="text-sm text-fog">Your most promising shortlisted options.</p>
@@ -152,7 +152,7 @@ export default function InterestedPage() {
                     key={property.id}
                     to={`/property/${property.id}`}
                     state={property}
-                    className="flex items-center gap-4 rounded-3xl border border-emeraldDark/10 bg-white p-4 transition hover:shadow-md"
+                  className="flex items-center gap-4 rounded-3xl border border-emeraldDark/10 bg-white p-4 transition hover:shadow-md"
                   >
                     <img
                       src={property.image}
@@ -172,8 +172,8 @@ export default function InterestedPage() {
             </div>
           </section>
 
-          <section className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-float backdrop-blur">
-            <div className="flex items-center justify-between">
+          <section className="rounded-[24px] border border-white/70 bg-white/90 p-4 shadow-float backdrop-blur sm:rounded-[32px] sm:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="font-display text-2xl text-emeraldDark">Visit pipeline</h2>
                 <p className="text-sm text-fog">Keep tabs on your property tours and confirmations.</p>
@@ -205,7 +205,7 @@ export default function InterestedPage() {
                     <p className="mt-1 text-sm text-fog">
                       {new Date(visit.scheduledFor).toLocaleString()}
                     </p>
-                    <div className="mt-3 flex items-center justify-between">
+                    <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <span className="text-sm text-fog">{visit.property?.location}</span>
                       <span className="rounded-full bg-sandstone px-3 py-1 text-xs font-semibold capitalize text-inkSlate">
                         {visit.status}

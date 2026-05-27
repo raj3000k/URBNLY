@@ -102,6 +102,7 @@ export const WishlistProvider = ({
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useWishlist = () => {
   const context = useContext(WishlistContext);
 

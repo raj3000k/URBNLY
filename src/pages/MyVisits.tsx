@@ -40,15 +40,15 @@ export default function MyVisits() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-mintMist via-white to-sandstone/50 px-4 py-8">
+    <div className="page-enter min-h-screen overflow-x-hidden bg-gradient-to-br from-mintMist via-white to-sandstone/50 px-3 py-5 sm:px-4 sm:py-8">
       <div className="mx-auto max-w-5xl space-y-6">
-        <div className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-float backdrop-blur">
+        <div className="rounded-[24px] border border-white/70 bg-white/90 p-4 shadow-float backdrop-blur sm:rounded-[32px] sm:p-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emeraldAccent">
                 My visits
               </p>
-              <h1 className="mt-2 font-display text-3xl text-emeraldDark">
+              <h1 className="mt-2 font-display text-2xl text-emeraldDark sm:text-3xl">
                 Track your scheduled property visits
               </h1>
               <p className="mt-2 text-sm text-fog">
@@ -58,7 +58,7 @@ export default function MyVisits() {
 
             <Link
               to="/interested"
-              className="rounded-2xl bg-emeraldDark px-4 py-3 text-sm font-semibold text-white transition hover:bg-emeraldAccent"
+              className="rounded-2xl bg-emeraldDark px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-emeraldAccent"
             >
               Back to workspace
             </Link>
@@ -85,7 +85,7 @@ export default function MyVisits() {
                 className="rounded-[28px] border border-white/70 bg-white/90 p-5 shadow-float"
               >
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                  <div className="flex gap-4">
+                  <div className="flex min-w-0 gap-4">
                     {visit.property?.image && (
                       <img
                         src={visit.property.image}

@@ -7,15 +7,15 @@ export default function SavedProperties() {
   const { savedProperties, loading } = useWishlist();
 
   return (
-    <div className="min-h-screen px-4 py-8">
+    <div className="page-enter min-h-screen overflow-x-hidden px-3 py-5 sm:px-4 sm:py-8">
       <div className="mx-auto max-w-5xl">
-        <div className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-float backdrop-blur">
+        <div className="rounded-[24px] border border-white/70 bg-white/90 p-4 shadow-float backdrop-blur sm:rounded-[32px] sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emeraldAccent">
                 Wishlist
               </p>
-              <h1 className="mt-2 font-display text-3xl text-emeraldDark">
+              <h1 className="mt-2 font-display text-2xl text-emeraldDark sm:text-3xl">
                 Saved properties
               </h1>
               <p className="mt-2 text-sm text-fog">
@@ -24,7 +24,7 @@ export default function SavedProperties() {
               </p>
             </div>
 
-            <div className="inline-flex items-center gap-2 rounded-2xl bg-emeraldSoft px-4 py-3 text-sm font-semibold text-emeraldDark">
+            <div className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emeraldSoft px-4 py-3 text-sm font-semibold text-emeraldDark">
               <Heart size={16} className="fill-red-500 text-red-500" />
               {savedProperties.length} saved
             </div>

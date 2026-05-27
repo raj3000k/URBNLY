@@ -132,24 +132,24 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen px-4 py-8">
+    <div className="page-enter min-h-screen overflow-x-hidden px-3 py-5 sm:px-4 sm:py-8">
       <div className="mx-auto max-w-4xl space-y-6">
-        <div className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-float backdrop-blur">
+        <div className="rounded-[24px] border border-white/70 bg-white/90 p-4 shadow-float backdrop-blur sm:rounded-[32px] sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-emeraldSoft text-emeraldDark">
+            <div className="flex min-w-0 items-center gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emeraldSoft text-emeraldDark sm:h-16 sm:w-16 sm:rounded-3xl">
                 <UserCircle2 size={34} />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emeraldAccent">
                   Profile
                 </p>
-                <h1 className="mt-1 font-display text-3xl text-emeraldDark">
+                <h1 className="mt-1 break-words font-display text-2xl text-emeraldDark sm:text-3xl">
                   {user.name}
                 </h1>
-                <div className="mt-2 flex items-center gap-2 text-sm text-fog">
+                <div className="mt-2 flex min-w-0 items-center gap-2 text-sm text-fog">
                   <Mail size={14} />
-                  <span>{user.email}</span>
+                  <span className="truncate">{user.email}</span>
                 </div>
               </div>
             </div>
@@ -165,7 +165,7 @@ export default function Profile() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.3fr_0.9fr]">
-          <section className="rounded-[28px] border border-white/70 bg-white/85 p-6 shadow-float backdrop-blur">
+          <section className="rounded-[24px] border border-white/70 bg-white/85 p-4 shadow-float backdrop-blur sm:rounded-[28px] sm:p-6">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emeraldAccent">
               Account details
             </p>
@@ -180,7 +180,7 @@ export default function Profile() {
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-fog">
                   Email
                 </p>
-                <p className="mt-2 text-lg font-semibold text-inkSlate">
+                <p className="mt-2 break-words text-base font-semibold text-inkSlate sm:text-lg">
                   {user.email}
                 </p>
               </div>

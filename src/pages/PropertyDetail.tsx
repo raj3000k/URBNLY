@@ -284,13 +284,13 @@ export default function PropertyDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-mintMist via-white to-sandstone/60 pb-28">
-      <div className="mx-auto max-w-6xl px-4 py-5">
-        <div className="relative overflow-hidden rounded-[34px] border border-white/70 bg-white/80 shadow-float backdrop-blur">
+    <div className="page-enter min-h-screen overflow-x-hidden bg-gradient-to-br from-mintMist via-white to-sandstone/60 pb-28">
+      <div className="mx-auto max-w-6xl px-3 py-4 sm:px-4 sm:py-5">
+        <div className="relative overflow-hidden rounded-[24px] border border-white/70 bg-white/80 shadow-float backdrop-blur sm:rounded-[34px]">
           <img
             src={activeImage}
             alt={property.title}
-            className="h-[320px] w-full object-cover sm:h-[420px]"
+            className="h-[260px] w-full object-cover sm:h-[420px]"
           />
 
           <div className="absolute inset-x-0 top-0 flex items-center justify-between p-4">
@@ -350,7 +350,7 @@ export default function PropertyDetail() {
         </div>
 
         {gallery.length > 1 && (
-          <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
+          <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3">
             {gallery.map((image, index) => (
               <button
                 key={`${property.id}-${index}`}
@@ -364,7 +364,7 @@ export default function PropertyDetail() {
                 <img
                   src={image}
                   alt={`${property.title} ${index + 1}`}
-                  className="h-24 w-full object-cover"
+                  className="h-20 w-full object-cover sm:h-24"
                 />
               </button>
             ))}
@@ -373,7 +373,7 @@ export default function PropertyDetail() {
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
           <section className="space-y-6">
-            <div className="rounded-[32px] border border-white/70 bg-white/90 p-6 shadow-float backdrop-blur">
+            <div className="rounded-[24px] border border-white/70 bg-white/90 p-4 shadow-float backdrop-blur sm:rounded-[32px] sm:p-6">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -390,7 +390,7 @@ export default function PropertyDetail() {
                     )}
                   </div>
 
-                  <h1 className="mt-4 font-display text-3xl text-emeraldDark sm:text-4xl">
+                  <h1 className="mt-4 break-words font-display text-3xl text-emeraldDark sm:text-4xl">
                     {property.title}
                   </h1>
                   <div className="mt-3 flex items-center gap-2 text-sm text-fog">

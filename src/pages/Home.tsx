@@ -357,42 +357,42 @@ export default function Home() {
   }, [hasMore, loading]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 space-y-4">
+    <div className="page-enter min-h-screen space-y-4 overflow-x-hidden bg-gray-50 p-3 sm:p-4">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-3 rounded-2xl bg-white/80 p-3 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:bg-transparent sm:p-0 sm:shadow-none">
         <Link to="/home" className="inline-flex items-center">
           <BrandLogo subtitle="Premium city stays" />
         </Link>
 
         {user && (
-          <div className="flex items-center gap-3">
+          <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-end sm:gap-3">
             <Link
               to="/saved"
-              className="rounded-lg border border-emeraldAccent/20 bg-emeraldAccent/10 px-3 py-1 text-sm font-semibold text-emeraldDark"
+              className="rounded-lg border border-emeraldAccent/20 bg-emeraldAccent/10 px-3 py-2 text-center text-sm font-semibold text-emeraldDark"
             >
               Saved
             </Link>
             <Link
               to="/visits"
-              className="rounded-lg border border-emeraldDark/10 px-3 py-1 text-sm font-semibold text-emeraldDark"
+              className="rounded-lg border border-emeraldDark/10 px-3 py-2 text-center text-sm font-semibold text-emeraldDark"
             >
               Visits
             </Link>
             <Link
               to="/interested"
-              className="rounded-lg border border-emeraldDark/10 px-3 py-1 text-sm font-semibold text-emeraldDark"
+              className="rounded-lg border border-emeraldDark/10 px-3 py-2 text-center text-sm font-semibold text-emeraldDark"
             >
               Interested
             </Link>
             <Link
               to="/profile"
-              className="rounded-lg border border-emeraldDark/10 px-3 py-1 text-sm font-semibold text-emeraldDark"
+              className="rounded-lg border border-emeraldDark/10 px-3 py-2 text-center text-sm font-semibold text-emeraldDark"
             >
               {user.name.split(" ")[0]}
             </Link>
             <button
               onClick={logout}
-              className="text-sm text-red-500 border border-red-300 px-3 py-1 rounded-lg"
+              className="rounded-lg border border-red-300 px-3 py-2 text-sm text-red-500 sm:col-auto"
             >
               Logout
             </button>

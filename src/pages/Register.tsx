@@ -26,10 +26,6 @@ export default function Register() {
   const navigate = useNavigate();
   const { login, user } = useAuth();
 
-  if (user) {
-    return <Navigate to={user.role === "owner" ? "/dashboard" : "/interested"} replace />;
-  }
-
   const validationMessage = useMemo(() => {
     if (!form.name.trim()) return "Please enter your name.";
     if (!form.email.trim()) return "Please enter your email address.";
@@ -45,6 +41,10 @@ export default function Register() {
     }
     return "";
   }, [form]);
+
+  if (user) {
+    return <Navigate to={user.role === "owner" ? "/dashboard" : "/interested"} replace />;
+  }
 
   const updateField =
     (field: keyof FormState) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,8 +87,8 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-hero-grid bg-hero-grid px-4 py-10">
-      <div className="mx-auto max-w-lg rounded-[28px] border border-white/70 bg-white/90 p-8 shadow-float backdrop-blur">
+    <div className="page-enter min-h-screen overflow-x-hidden bg-hero-grid bg-hero-grid px-3 py-6 sm:px-4 sm:py-10">
+      <div className="mx-auto max-w-lg rounded-[24px] border border-white/70 bg-white/90 p-5 shadow-float backdrop-blur sm:rounded-[28px] sm:p-8">
         <BrandLogo subtitle="Premium city stays" />
         <h1 className="mt-3 font-display text-3xl text-emeraldDark">
           Create your account
