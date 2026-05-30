@@ -6,11 +6,10 @@ import RecommendationBanner from "../components/RecommendationBanner";
 import Filters from "../components/Filters";
 import SkeletonCard from "../components/SkeletonCard";
 import SortBar, { type SortOption } from "../components/SortBar";
-import BrandLogo from "../components/BrandLogo";
+import UserNav from "../components/UserNav";
 import type { Property } from "../types/property";
 import useDebounce from "../hooks/useDebounce";
 import { useAuth } from "../context/AuthContext";
-import { Link } from "react-router-dom";
 import type { CommuteInfo } from "../types/commute";
 import type { PlaceSuggestion, SelectedPlace } from "../types/place";
 
@@ -32,7 +31,7 @@ export default function Home() {
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   const debouncedSearch = useDebounce(search, 300);
   const debouncedOfficeQuery = useDebounce(officeQuery, 350);
@@ -358,47 +357,7 @@ export default function Home() {
 
   return (
     <div className="page-enter min-h-screen space-y-4 overflow-x-hidden bg-gray-50 p-3 sm:p-4">
-      {/* Header */}
-      <div className="flex flex-col gap-3 rounded-2xl bg-white/80 p-3 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:bg-transparent sm:p-0 sm:shadow-none">
-        <Link to="/home" className="inline-flex items-center">
-          <BrandLogo subtitle="Premium city stays" />
-        </Link>
-
-        {user && (
-          <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-end sm:gap-3">
-            <Link
-              to="/saved"
-              className="rounded-lg border border-emeraldAccent/20 bg-emeraldAccent/10 px-3 py-2 text-center text-sm font-semibold text-emeraldDark"
-            >
-              Saved
-            </Link>
-            <Link
-              to="/visits"
-              className="rounded-lg border border-emeraldDark/10 px-3 py-2 text-center text-sm font-semibold text-emeraldDark"
-            >
-              Visits
-            </Link>
-            <Link
-              to="/interested"
-              className="rounded-lg border border-emeraldDark/10 px-3 py-2 text-center text-sm font-semibold text-emeraldDark"
-            >
-              Interested
-            </Link>
-            <Link
-              to="/profile"
-              className="rounded-lg border border-emeraldDark/10 px-3 py-2 text-center text-sm font-semibold text-emeraldDark"
-            >
-              {user.name.split(" ")[0]}
-            </Link>
-            <button
-              onClick={logout}
-              className="rounded-lg border border-red-300 px-3 py-2 text-sm text-red-500 sm:col-auto"
-            >
-              Logout
-            </button>
-          </div>
-        )}
-      </div>
+      {user && <UserNav />}
 
       <SearchBar value={search} onChange={setSearch} />
       <RecommendationBanner

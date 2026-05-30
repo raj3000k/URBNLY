@@ -17,26 +17,25 @@ export default function PropertyCard({ property }: Props) {
   return (
     <div
       onClick={() => navigate(`/property/${property.id}`, { state: property })}
-      className="cursor-pointer bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition duration-200"
+      className="surface-lift cursor-pointer overflow-hidden rounded-[28px] border border-white/70 bg-white/95 shadow-float backdrop-blur"
     >
       {/* Image */}
       <div className="relative">
         <img
           src={property.image}
           alt={property.title}
-          className="w-full h-48 object-cover"
+          className="h-56 w-full object-cover"
         />
 
-        {/* Tags */}
-        <div className="absolute top-3 left-3 flex gap-2">
+        <div className="absolute left-3 top-3 flex gap-2">
           {property.available && (
-            <span className="bg-emeraldAccent text-white text-xs px-2 py-1 rounded-md">
+            <span className="rounded-full bg-emeraldAccent px-3 py-1 text-xs font-semibold text-white shadow-sm">
               Available
             </span>
           )}
 
           {property.verified && (
-            <span className="bg-white text-emeraldDark text-xs px-2 py-1 rounded-md flex items-center gap-1 shadow">
+            <span className="flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-semibold text-emeraldDark shadow-sm">
               <CheckCircle size={12} />
               Verified
             </span>
@@ -66,27 +65,23 @@ export default function PropertyCard({ property }: Props) {
         )}
       </div>
 
-      {/* Content */}
-      <div className="p-4">
-        {/* Title + Price */}
-        <div className="flex justify-between items-start">
-          <h2 className="font-semibold text-gray-800 text-sm leading-tight">
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-4">
+          <h2 className="font-display text-2xl leading-tight text-emeraldDark">
             {property.title}
           </h2>
 
-          <span className="text-emeraldAccent font-semibold text-sm">
+          <span className="shrink-0 rounded-2xl bg-mintMist px-3 py-2 text-sm font-bold text-emeraldDark">
             ₹{property.price}
           </span>
         </div>
 
-        {/* Location */}
-        <div className="flex items-center gap-1 mt-2 text-gray-500 text-xs">
+        <div className="mt-3 flex items-center gap-2 text-sm text-fog">
           <MapPin size={14} />
           <span>{property.location}</span>
         </div>
 
-        {/* Distance */}
-        <p className="text-gray-500 text-xs mt-1">
+        <p className="mt-1 text-sm text-fog">
           {property.commute
             ? `${property.commute.durationText} drive • ${property.commute.distanceText}`
             : `${property.distance} from office`}
@@ -132,15 +127,19 @@ export default function PropertyCard({ property }: Props) {
             </p>
           )}
 
-        {/* CTA */}
+        <div className="mt-3 flex items-start gap-2 rounded-2xl border border-emeraldAccent/20 bg-mintMist px-3 py-2 text-xs text-emeraldDark">
+          <Users2 size={14} className="mt-0.5 shrink-0" />
+          <p className="font-semibold">4 people from your office are also living here.</p>
+        </div>
+
         <button
           onClick={(e) => {
             e.stopPropagation();
             navigate(`/property/${property.id}`, { state: property });
           }}
-          className="mt-4 w-full bg-emeraldAccent hover:bg-green-600 text-white text-sm py-2.5 rounded-xl transition"
+          className="mt-5 w-full rounded-2xl bg-emeraldDark px-4 py-3 text-sm font-semibold text-white transition hover:bg-emeraldAccent"
         >
-          View Details
+          View details
         </button>
       </div>
     </div>

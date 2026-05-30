@@ -1,6 +1,7 @@
 import { Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import PropertyCard from "../components/PropertyCard";
+import UserNav from "../components/UserNav";
 import { useWishlist } from "../context/WishlistContext";
 
 export default function SavedProperties() {
@@ -8,7 +9,9 @@ export default function SavedProperties() {
 
   return (
     <div className="page-enter min-h-screen overflow-x-hidden px-3 py-5 sm:px-4 sm:py-8">
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-5xl space-y-6">
+        <UserNav />
+
         <div className="rounded-[24px] border border-white/70 bg-white/90 p-4 shadow-float backdrop-blur sm:rounded-[32px] sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -32,9 +35,9 @@ export default function SavedProperties() {
         </div>
 
         {loading ? (
-          <p className="mt-8 text-sm text-fog">Loading your saved properties...</p>
+          <p className="text-sm text-fog">Loading your saved properties...</p>
         ) : savedProperties.length === 0 ? (
-          <div className="mt-8 rounded-[28px] border border-dashed border-emeraldDark/20 bg-white/80 p-10 text-center shadow-sm">
+          <div className="rounded-[28px] border border-dashed border-emeraldDark/20 bg-white/80 p-10 text-center shadow-sm">
             <h2 className="font-display text-2xl text-emeraldDark">
               No saved properties yet
             </h2>
@@ -49,7 +52,7 @@ export default function SavedProperties() {
             </Link>
           </div>
         ) : (
-          <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {savedProperties.map((property) => (
               <PropertyCard key={property.id} property={property} />
             ))}

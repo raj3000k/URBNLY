@@ -11,47 +11,8 @@ import axios from "axios";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import type { Property } from "../types/property";
-import type { RoommatePreferences } from "../types/match";
-
-const preferenceOptions = {
-  sleepSchedule: [
-    { value: "", label: "Select sleep style" },
-    { value: "early_bird", label: "Early bird" },
-    { value: "night_owl", label: "Night owl" },
-  ],
-  cleanliness: [
-    { value: "", label: "Select cleanliness level" },
-    { value: "medium", label: "Medium" },
-    { value: "high", label: "High" },
-  ],
-  foodPreference: [
-    { value: "", label: "Select food preference" },
-    { value: "veg", label: "Veg" },
-    { value: "eggetarian", label: "Eggetarian" },
-    { value: "any", label: "Any" },
-  ],
-  socialStyle: [
-    { value: "", label: "Select social style" },
-    { value: "quiet", label: "Quiet" },
-    { value: "balanced", label: "Balanced" },
-    { value: "social", label: "Social" },
-  ],
-  workMode: [
-    { value: "", label: "Select work mode" },
-    { value: "office", label: "Office" },
-    { value: "hybrid", label: "Hybrid" },
-    { value: "remote", label: "Remote" },
-  ],
-};
-
-const emptyPreferences: RoommatePreferences = {
-  sleepSchedule: "",
-  cleanliness: "",
-  foodPreference: "",
-  socialStyle: "",
-  workMode: "",
-  budgetPreference: "",
-};
+import UserNav from "../components/UserNav";
+import { emptyPreferences, preferenceOptions } from "../utils/preferences";
 
 export default function Profile() {
   const { user, logout, updateUser } = useAuth();
@@ -134,6 +95,8 @@ export default function Profile() {
   return (
     <div className="page-enter min-h-screen overflow-x-hidden px-3 py-5 sm:px-4 sm:py-8">
       <div className="mx-auto max-w-4xl space-y-6">
+        <UserNav />
+
         <div className="rounded-[24px] border border-white/70 bg-white/90 p-4 shadow-float backdrop-blur sm:rounded-[32px] sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-center gap-4">

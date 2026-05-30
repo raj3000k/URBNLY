@@ -5,6 +5,7 @@ export interface Property {
   ownerId?: string;
   title: string;
   location: string;
+  landmark: string;
   price: number;
   image: string;
   images: string[];

@@ -4,6 +4,7 @@ import { CalendarDays, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../utils/api";
 import type { Visit } from "../types/visit";
+import UserNav from "../components/UserNav";
 
 const statusClassMap: Record<string, string> = {
   pending: "bg-amber-100 text-amber-700",
@@ -42,6 +43,8 @@ export default function MyVisits() {
   return (
     <div className="page-enter min-h-screen overflow-x-hidden bg-gradient-to-br from-mintMist via-white to-sandstone/50 px-3 py-5 sm:px-4 sm:py-8">
       <div className="mx-auto max-w-5xl space-y-6">
+        <UserNav />
+
         <div className="rounded-[24px] border border-white/70 bg-white/90 p-4 shadow-float backdrop-blur sm:rounded-[32px] sm:p-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>

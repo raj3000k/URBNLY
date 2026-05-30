@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import BrandLogo from "../components/BrandLogo";
+import LoadingButton from "../components/LoadingButton";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -85,13 +86,21 @@ export default function Login() {
           </p>
         )}
 
-        <button
+        {submitting && (
+          <div className="mt-4 rounded-2xl border border-emeraldAccent/20 bg-emeraldAccent/10 px-4 py-3 text-sm text-emeraldDark">
+            Warming up your workspace and syncing saved stays. This can take a few
+            seconds on the free backend.
+          </div>
+        )}
+
+        <LoadingButton
           onClick={handleLogin}
-          disabled={submitting}
-          className="mt-6 w-full rounded-2xl bg-emeraldDark px-4 py-3 font-semibold text-white transition hover:bg-emeraldAccent disabled:cursor-not-allowed disabled:opacity-70"
+          loading={submitting}
+          loadingText="Opening your workspace..."
+          className="mt-6 w-full"
         >
-          {submitting ? "Signing in..." : "Login"}
-        </button>
+          Login
+        </LoadingButton>
 
         <p className="mt-6 text-center text-sm text-fog">
           New here?{" "}

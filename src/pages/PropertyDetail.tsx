@@ -8,9 +8,11 @@ import {
   ChevronRight,
   Heart,
   MapPin,
+  Navigation,
   ShieldCheck,
   Sparkles,
   Utensils,
+  UserPlus,
   Users2,
 } from "lucide-react";
 import axios from "axios";
@@ -62,6 +64,9 @@ export default function PropertyDetail() {
   const [visitSubmitting, setVisitSubmitting] = useState(false);
   const [visitMessage, setVisitMessage] = useState("");
   const [visitError, setVisitError] = useState("");
+  const [interestSubmittingId, setInterestSubmittingId] = useState("");
+  const [interestMessage, setInterestMessage] = useState("");
+  const [interestError, setInterestError] = useState("");
   const { toggleWishlist, isSaved } = useWishlist();
   const { user } = useAuth();
 
@@ -283,6 +288,28 @@ export default function PropertyDetail() {
     }
   };
 
+  const handleRoommateInterest = async (match: RoommateMatch) => {
+    setInterestSubmittingId(match.userId);
+    setInterestMessage("");
+    setInterestError("");
+
+    try {
+      const response = await api.post(`/matches/${property.id}/interest`, {
+        recipientId: match.userId,
+        message: `Hi ${match.firstName}, I found your profile through ${property.title} and would like to connect for a possible roommate fit.`,
+      });
+      setInterestMessage(response.data.message || "Roommate interest sent.");
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setInterestError(err.response?.data?.message || "Unable to send roommate interest");
+      } else {
+        setInterestError("Unable to send roommate interest");
+      }
+    } finally {
+      setInterestSubmittingId("");
+    }
+  };
+
   return (
     <div className="page-enter min-h-screen overflow-x-hidden bg-gradient-to-br from-mintMist via-white to-sandstone/60 pb-28">
       <div className="mx-auto max-w-6xl px-3 py-4 sm:px-4 sm:py-5">
@@ -403,6 +430,12 @@ export default function PropertyDetail() {
                         : `${property.distance} from office`}
                     </span>
                   </div>
+                  {property.landmark && (
+                    <div className="mt-2 flex items-center gap-2 text-sm text-fog">
+                      <Navigation size={15} />
+                      <span>Landmark: {property.landmark}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="rounded-[28px] bg-mintMist p-4 text-right">
@@ -417,6 +450,13 @@ export default function PropertyDetail() {
               </div>
 
               <p className="mt-6 text-sm leading-7 text-fog">{property.description}</p>
+
+              <div className="mt-6 flex items-start gap-3 rounded-[24px] border border-emeraldAccent/20 bg-emeraldAccent/10 p-4 text-sm text-emeraldDark">
+                <Users2 size={18} className="mt-0.5 shrink-0" />
+                <p className="font-semibold">
+                  4 people from your office are also living here.
+                </p>
+              </div>
 
               {property.socialProof && property.socialProof.colleaguesCount > 0 && (
                 <div className="mt-6 flex items-start gap-3 rounded-[24px] border border-emeraldAccent/20 bg-emeraldAccent/10 p-4 text-sm text-emeraldDark">
@@ -603,8 +643,31 @@ export default function PropertyDetail() {
                           ))}
                         </div>
                       )}
+
+                      <button
+                        onClick={() => handleRoommateInterest(match)}
+                        disabled={interestSubmittingId === match.userId}
+                        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emeraldDark px-4 py-3 text-sm font-semibold text-white transition hover:bg-emeraldAccent disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
+                      >
+                        <UserPlus size={16} />
+                        {interestSubmittingId === match.userId
+                          ? "Sending interest..."
+                          : `Show interest in ${match.firstName}`}
+                      </button>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {(interestMessage || interestError) && (
+                <div
+                  className={`mt-5 rounded-2xl px-4 py-3 text-sm ${
+                    interestError
+                      ? "border border-red-200 bg-red-50 text-red-600"
+                      : "border border-emeraldAccent/20 bg-emeraldSoft text-emeraldDark"
+                  }`}
+                >
+                  {interestError || interestMessage}
                 </div>
               )}
             </div>

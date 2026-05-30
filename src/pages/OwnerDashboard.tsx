@@ -24,6 +24,7 @@ import type { PlaceSuggestion } from "../types/place";
 type FormState = {
   title: string;
   location: string;
+  landmark: string;
   price: string;
   distance: string;
   roomType: string;
@@ -34,6 +35,7 @@ type FormState = {
   highlights: string;
   amenities: string;
   houseRules: string;
+  ownerPhone: string;
   foodIncluded: boolean;
   totalRooms: number;
   occupiedRooms: number;
@@ -48,6 +50,7 @@ type RoomInventoryItem = {
 const initialForm: FormState = {
   title: "",
   location: "",
+  landmark: "",
   price: "",
   distance: "",
   roomType: "",
@@ -58,6 +61,7 @@ const initialForm: FormState = {
   highlights: "",
   amenities: "",
   houseRules: "",
+  ownerPhone: "",
   foodIncluded: true,
   totalRooms: 1,
   occupiedRooms: 0,
@@ -100,6 +104,7 @@ const roomInventoryFromProperty = (property: Property): RoomInventoryItem[] => {
 const formFromProperty = (property: Property): FormState => ({
   title: property.title,
   location: property.location,
+  landmark: property.landmark || "",
   price: String(property.price),
   distance: property.distance,
   roomType: property.roomType,
@@ -110,6 +115,7 @@ const formFromProperty = (property: Property): FormState => ({
   highlights: joinCsv(property.highlights),
   amenities: joinCsv(property.amenities),
   houseRules: joinCsv(property.houseRules),
+  ownerPhone: property.owner.phone,
   foodIncluded: property.foodIncluded,
   totalRooms: property.totalRooms,
   occupiedRooms: property.occupiedRooms,
@@ -368,6 +374,7 @@ export default function OwnerDashboard() {
       const payload = {
         title: form.title,
         location: form.location,
+        landmark: form.landmark,
         price: Number(form.price),
         distance: form.distance,
         roomType:
@@ -379,6 +386,7 @@ export default function OwnerDashboard() {
         highlights: splitCsv(form.highlights),
         amenities: splitCsv(form.amenities),
         houseRules: splitCsv(form.houseRules),
+        ownerPhone: form.ownerPhone,
         foodIncluded: form.foodIncluded,
         totalRooms: form.totalRooms,
         occupiedRooms: form.occupiedRooms,
@@ -634,6 +642,13 @@ export default function OwnerDashboard() {
                 </button>
 
                 <input
+                  value={form.landmark}
+                  onChange={updateField("landmark")}
+                  placeholder="Nearby landmark for visit directions"
+                  className="rounded-2xl border border-emeraldDark/10 px-4 py-3 outline-none focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10 md:col-span-2"
+                />
+
+                <input
                   value={form.price}
                   onChange={updateField("price")}
                   placeholder="Monthly price"
@@ -657,6 +672,12 @@ export default function OwnerDashboard() {
                   value={form.roomType}
                   onChange={updateField("roomType")}
                   placeholder="Room mix summary (optional)"
+                  className="rounded-2xl border border-emeraldDark/10 px-4 py-3 outline-none focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10"
+                />
+                <input
+                  value={form.ownerPhone}
+                  onChange={updateField("ownerPhone")}
+                  placeholder="POC contact number for confirmed visits"
                   className="rounded-2xl border border-emeraldDark/10 px-4 py-3 outline-none focus:border-emeraldAccent focus:ring-4 focus:ring-emeraldAccent/10"
                 />
                 <input

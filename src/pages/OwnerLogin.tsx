@@ -4,6 +4,7 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 import BrandLogo from "../components/BrandLogo";
+import LoadingButton from "../components/LoadingButton";
 
 export default function OwnerLogin() {
   const [email, setEmail] = useState("");
@@ -89,13 +90,21 @@ export default function OwnerLogin() {
           </p>
         )}
 
-        <button
+        {submitting && (
+          <div className="mt-4 rounded-2xl border border-emeraldAccent/20 bg-emeraldAccent/10 px-4 py-3 text-sm text-emeraldDark">
+            Loading listings, visit requests, and inventory controls. Render may need
+            a few seconds to wake up.
+          </div>
+        )}
+
+        <LoadingButton
           onClick={handleLogin}
-          disabled={submitting}
-          className="mt-6 w-full rounded-2xl bg-emeraldDark px-4 py-3 font-semibold text-white transition hover:bg-emeraldAccent disabled:cursor-not-allowed disabled:opacity-70"
+          loading={submitting}
+          loadingText="Opening owner portal..."
+          className="mt-6 w-full"
         >
-          {submitting ? "Signing in..." : "Enter owner portal"}
-        </button>
+          Enter owner portal
+        </LoadingButton>
 
         <p className="mt-6 text-center text-sm text-fog">
           New property owner?{" "}
